@@ -1,0 +1,47 @@
+@page "/fetchdata"
+@inject HttpClient Http
+@using influx_fe.Models
+@inject IJSRuntime JSRuntime
+
+@if (IntList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h4>Random Integer Values</h4>
+            </div>
+            <div class="card-body">
+                @if (IntList != null) 
+                {
+                    <ChartComponent List="IntList"></ChartComponent>
+                }
+            </div>
+            <div class="card-footer">
+                @if (IntList != null) 
+                {
+                    <input type="range" min="0" max="@(IntList.Count - 1)" step="1" class="form-control" @oninput="@((ChangeEventArgs e) => ChangeSlider(int.Parse((string)e.Value)))" />
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<IntModel> IntList;
+    private int SliderValue = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IntList = await Http.GetFromJsonAsync<List<IntModel>>("https://localhost:44387/api/Data/RandomInt");
+        SliderValue = IntList.Count - 1;
+    }
+
+    private void ChangeSlider(int value) 
+    {
+        JSRuntime.InvokeVoidAsync("editData", value);
+    }
+}
