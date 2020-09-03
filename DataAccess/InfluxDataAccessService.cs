@@ -36,9 +36,9 @@ namespace DataAccess
             return result.First().Entries.ToList();
         }
 
-        public async Task<List<IntModel>> GetIntEntries()
+        public async Task<List<IntModel>> GetIntEntries(DateTime DateStart, DateTime DateEnd)
         {
-            var result = await _client.QueryMultiSeriesAsync<IntModel>(_dbName, "SELECT * FROM RandomFloat");
+            var result = await _client.QueryMultiSeriesAsync<IntModel>(_dbName, $"SELECT * FROM RandomFloat WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
             return result.First().Entries.ToList();
         }
 
@@ -46,6 +46,12 @@ namespace DataAccess
         {
             var result = await _client.QueryMultiSeriesAsync<StringModel>(_dbName, "SELECT * FROM LoremIpsum");
             return result.First().Entries.ToList();
+        }
+
+        private long GetEpoch(DateTime Date)
+        {
+            var epochStart = new DateTime(1970, 1, 1);
+            return (Date - epochStart).Ticks * 100;
         }
     }
 }

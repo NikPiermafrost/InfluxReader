@@ -91,9 +91,7 @@
     private async Task ResetDataSimulation()
     {
         var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
-                                    && x.Time.Date <= MaxDate.Date
-                                    && x.Time.TimeOfDay >= MinTime.TimeOfDay
-                                    && x.Time.TimeOfDay <= MaxTime.TimeOfDay).ToList();
+                                    && x.Time.Date <= MaxDate.Date).ToList();
         await JSRuntime.InvokeVoidAsync("resetDataReplay", List.IndexOf(tmpArray.First()), List.IndexOf(tmpArray.Last()));
     }
 

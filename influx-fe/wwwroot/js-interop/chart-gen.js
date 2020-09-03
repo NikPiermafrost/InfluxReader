@@ -13,7 +13,7 @@ var genChart = (values) => {
             labels: values.map(x => x.Time),
             datasets: [{
                 label: 'Dataset',
-                //backgroundColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgb(255, 99, 132)',
                 borderColor: 'rgb(255, 99, 132)',
                 data: values.map(x => x.Value)
             }]
@@ -36,6 +36,13 @@ var editData = (value) => {
     var tmpArray = arr.slice(0, value + 1);
     chart.data.labels = tmpArray.map(x => x.Time);
     chart.data.datasets[0].data = tmpArray.map(x => x.Value);
+    chart.update();
+}
+
+//create new dataset for graph
+var newDataset = (newArray) => {
+    chart.data.labels = newArray.map(x => x.Time);
+    chart.data.datasets[0].data = newArray.map(x => x.Value);
     chart.update();
 }
 

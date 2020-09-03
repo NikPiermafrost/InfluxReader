@@ -75,7 +75,7 @@ namespace InfluxReader.Controllers
         {
             try
             {
-                var res = await _srv.GetIntEntries();
+                var res = await _srv.GetIntEntries(DateTime.Parse("2020-09-03T09:00"), DateTime.Parse("2020-09-03T09:05"));
                 return Ok(res);
             }
             catch (Exception ex)
