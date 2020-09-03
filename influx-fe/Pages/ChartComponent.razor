@@ -13,7 +13,7 @@
                 <canvas id="integer-chart" style="width: 100%; height: 600px !important"></canvas>
             </div>
             <div>
-                <input type="range" min="0" max="@(List.Count - 1)" step="1" class="form-control" @oninput="@((ChangeEventArgs e) => ChangeSlider(int.Parse((string)e.Value)))" />
+                <input type="range" min="1" max="@(List.Count - 1)" step="1" value="@(List.Count - 1)" class="form-control" @oninput="@((ChangeEventArgs e) => ChangeSlider(int.Parse((string)e.Value)))" />
             </div>
             <div class=""></div>
         }
@@ -123,5 +123,7 @@
                                     && x.Time.Date <= MaxDate.Date
                                     && x.Time.TimeOfDay >= MinTime.TimeOfDay
                                     && x.Time.TimeOfDay <= MaxTime.TimeOfDay).ToList();
-        await JSRuntime.InvokeVoidAsync("resetDataReplay", List.IndexOf(tmpArray.First()), List.IndexOf(tmpArray.last()));
+        await JSRuntime.InvokeVoidAsync("resetDataReplay", List.IndexOf(tmpArray.First()), List.IndexOf(tmpArray.Last()));
     }
+
+}

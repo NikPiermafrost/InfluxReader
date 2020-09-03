@@ -79,7 +79,51 @@ var genReplayChart = (values) => {
 //replay chart updater
 var resetDataReplay = (arrStart, arrEnd) => {
     replayChartarray = arr.slice(arrStart, arrEnd + 1);
-    replayChart.data.labels = tmpArray.map(x => x.Time);
-    replayChart.data.datasets[0].data = tmpArray.map(x => x.Value);
+    replayChart.data.labels = replayChartarray.map(x => x.Time);
+    replayChart.data.datasets[0].data = replayChartarray.map(x => x.Value);
+    replayChart.update();
+}
+
+//sets the interval for data reproduction
+var initializeSimulation = (ms, zoom) => {
+    var counter = 0;
+    clearSimulationChart();
+    var execution = setInterval(() => {
+        addDataToSimulation(counter);
+        if (zoom < counter && zoom >= 3) {
+            removeLastDataToSimulation();
+        }
+        replayChart.update()
+        counter++;
+        if (counter === replayChartarray.length) {
+            clearInterval(execution);
+            resetAfterSimulation();
+        }
+    }, ms);
+}
+
+//adds the next field for the simulation
+var addDataToSimulation = (arrPosition) => {
+    replayChart.data.labels.push(replayChartarray[arrPosition].Time);
+    replayChart.data.datasets[0].data.push(replayChartarray[arrPosition].Value);
+}
+
+//removes the first field for the simulation
+var removeLastDataToSimulation = () => {
+    replayChart.data.labels.shift();
+    replayChart.data.datasets[0].data.shift();
+}
+
+//resets the graph after simulation is completed
+var resetAfterSimulation = () => {
+    replayChart.data.labels = replayChartarray.map(x => x.Time);
+    replayChart.data.datasets[0].data = replayChartarray.map(x => x.Value);
+    replayChart.update();
+}
+
+//empties the chart for initialization
+var clearSimulationChart = () => {
+    replayChart.data.labels = [];
+    replayChart.data.datasets[0].data = [];
     replayChart.update();
 }
