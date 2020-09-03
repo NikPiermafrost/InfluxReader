@@ -2,18 +2,107 @@
 @using influx_fe.Models
 @using Newtonsoft.Json
 
-<canvas id="integer-chart" style="width: 100%; height: 600px;"></canvas>
+<div class="card">
+    <div class="card-header">
+        <h4>Random Integer Values</h4>
+    </div>
+    <div class="card-body" style="min-height: 600px;">
+        @if (List != null)
+        {
+            <div>
+                <canvas id="integer-chart" style="width: 100%; height: 600px !important"></canvas>
+            </div>
+            <div>
+                <input type="range" min="0" max="@(List.Count - 1)" step="1" class="form-control" @oninput="@((ChangeEventArgs e) => ChangeSlider(int.Parse((string)e.Value)))" />
+            </div>
+            <div class=""></div>
+        }
+    </div>
+    <div class="card-footer">
+        @if (List != null)
+        {
+            <div class="row">
+                <div class="form-row col-6">
+                    <label class="col-3">Start Date</label>
+                    <div class="col-9">
+                        <input type="date" class="form-comtrol" @bind="@StartDate" min="@MinDate.ToString("yyyy-MM-dd")" max="@MaxDate.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+                <div class="form-row col-6">
+                    <label class="col-3">End Date</label>
+                    <div class="col-9">
+                        <input type="date" class="form-comtrol" @bind="@EndDate" min="@MinDate.ToString("yyyy-MM-dd")" max="@MaxDate.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+            </div><div class="row">
+                <div class="form-row col-6">
+                    <label class="col-3">Start Time</label>
+                    <div class="col-9">
+                        <input type="time" class="form-comtrol" @bind="@MinTime"/>
+                    </div>
+                </div>
+                <div class="form-row col-6">
+                    <label class="col-3">End Time</label>
+                    <div class="col-9">
+                        <input type="time" class="form-comtrol" @bind="@MaxTime" />
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" @onclick="@(() => StartSimulation())">Start Replay</button>
+        }
+    </div>
+</div>
 
 @code {
+
+    private int SliderValue = 0;
+    private DateTime MinDate = DateTime.Now;
+    private DateTime MaxDate = DateTime.Now;
+    private DateTime StartDate = DateTime.Now;
+    private DateTime EndDate = DateTime.Now;
+    private DateTime MinTime = DateTime.Now;
+    private DateTime MaxTime = DateTime.Now;
 
     [Parameter]
     public List<IntModel> List { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    [Parameter]
+    public EventCallback<SimulationValues> EmitStart { get; set; }
+
+    protected override void OnInitialized()
     {
-        if (firstRender) 
+        SliderValue = List.Count - 1;
+        MinDate = List.Min(x => x.Time);
+        MaxDate = List.Max(x => x.Time);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         {
             await JSRuntime.InvokeVoidAsync("chartInitializer", JsonConvert.SerializeObject(List));
+        }
+    }
+
+    private void ChangeSlider(int value)
+    {
+        JSRuntime.InvokeVoidAsync("editData", value);
+    }
+
+    private async Task StartSimulation()
+    {
+        var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
+                                    && x.Time.Date <= MaxDate.Date
+                                    && x.Time.TimeOfDay >= MinTime.TimeOfDay
+                                    && x.Time.TimeOfDay <= MaxTime.TimeOfDay).ToList();
+        if (tmpArray.Count > 0)
+        {
+            var toEmit = new SimulationValues() 
+            { 
+                StartArray = List.IndexOf(tmpArray.First()),
+                EndArray = List.IndexOf(tmpArray.Last())
+            };
+            await EmitStart.InvokeAsync(toEmit);
         }
     }
 }

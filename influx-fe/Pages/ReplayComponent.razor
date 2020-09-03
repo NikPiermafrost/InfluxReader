@@ -1,0 +1,32 @@
+﻿@inject IJSRuntime JSRuntime
+@using influx_fe.Models
+@using Newtonsoft.Json
+
+<div class="col-6">
+    <div class="card">
+        <div class="card-header">
+            <h4>Replay</h4>
+        </div>
+        <div class="card-body" style="min-height: 600px;">
+            <canvas id="replay-chart" style="width: 100%;  height: 600px !important"></canvas>
+        </div>
+        <div class="card-footer">
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ArrayStart { get; set; }
+
+    [Parameter]
+    public int ArrayEnd { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initReplayChart", ArrayStart, ArrayEnd);
+        }
+    }
+}

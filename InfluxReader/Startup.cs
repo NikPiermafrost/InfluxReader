@@ -32,7 +32,7 @@ namespace InfluxReader
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                   builder =>
                                   {
-                                      builder.AllowAnyHeader().AllowAnyOrigin();
+                                      builder.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
                                   });
             });
             var address = Configuration.GetSection("ConfigurationParams").GetSection("ipAddress").Value;
