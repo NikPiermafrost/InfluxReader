@@ -48,12 +48,14 @@ var replayChart;
 //replay chart array
 var replayChartarray;
 
+//furst initialization of the replay chart
 var initReplayChart = (arrStart, arrEnd) => {
     replayCtx = document.getElementById('replay-chart').getContext('2d');
-    replayChartarray = arr.splice(arrStart, arrEnd + 1);
+    replayChartarray = arr.slice(arrStart, arrEnd + 1);
     genReplayChart(replayChartarray);
 }
 
+//initialization of the chart object
 var genReplayChart = (values) => {
     replayChart = new Chart(replayCtx, {
         // The type of chart we want to create
@@ -72,4 +74,12 @@ var genReplayChart = (values) => {
         // Configuration options go here
         options: {}
     });
+}
+
+//replay chart updater
+var resetDataReplay = (arrStart, arrEnd) => {
+    replayChartarray = arr.slice(arrStart, arrEnd + 1);
+    replayChart.data.labels = tmpArray.map(x => x.Time);
+    replayChart.data.datasets[0].data = tmpArray.map(x => x.Value);
+    replayChart.update();
 }

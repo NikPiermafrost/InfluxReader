@@ -34,11 +34,12 @@
                         <input type="date" class="form-comtrol" @bind="@EndDate" min="@MinDate.ToString("yyyy-MM-dd")" max="@MaxDate.ToString("yyyy-MM-dd")" />
                     </div>
                 </div>
-            </div><div class="row">
+            </div>
+            <div class="row">
                 <div class="form-row col-6">
                     <label class="col-3">Start Time</label>
                     <div class="col-9">
-                        <input type="time" class="form-comtrol" @bind="@MinTime"/>
+                        <input type="time" class="form-comtrol" @bind="@MinTime" />
                     </div>
                 </div>
                 <div class="form-row col-6">
@@ -48,7 +49,15 @@
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-primary" @onclick="@(() => StartSimulation())">Start Replay</button>
+            <div class="row">
+                <div class="form-row col-6">
+                    <button type="button" class="btn btn-primary" @onclick="@(() => StartSimulation())" disabled="@IsSimInitialized">Set Data</button>
+                </div>
+                <div class="form-row col-6">
+                    <button type="button" class="btn btn-primary" @onclick="@(() => ResetDataSimulation())" disabled="@(!IsSimInitialized)">Reset Data</button>
+                </div>
+            </div>
+
         }
     </div>
 </div>
@@ -62,6 +71,7 @@
     private DateTime EndDate = DateTime.Now;
     private DateTime MinTime = DateTime.Now;
     private DateTime MaxTime = DateTime.Now;
+    private bool IsSimInitialized = false;
 
     [Parameter]
     public List<IntModel> List { get; set; }
@@ -95,14 +105,23 @@
                                     && x.Time.Date <= MaxDate.Date
                                     && x.Time.TimeOfDay >= MinTime.TimeOfDay
                                     && x.Time.TimeOfDay <= MaxTime.TimeOfDay).ToList();
+        IsSimInitialized = true;
         if (tmpArray.Count > 0)
         {
-            var toEmit = new SimulationValues() 
-            { 
+            var toEmit = new SimulationValues()
+            {
                 StartArray = List.IndexOf(tmpArray.First()),
                 EndArray = List.IndexOf(tmpArray.Last())
             };
             await EmitStart.InvokeAsync(toEmit);
         }
     }
-}
+
+    private async Task ResetDataSimulation()
+    {
+        var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
+                                    && x.Time.Date <= MaxDate.Date
+                                    && x.Time.TimeOfDay >= MinTime.TimeOfDay
+                                    && x.Time.TimeOfDay <= MaxTime.TimeOfDay).ToList();
+        await JSRuntime.InvokeVoidAsync("resetDataReplay", List.IndexOf(tmpArray.First()), List.IndexOf(tmpArray.last()));
+    }
