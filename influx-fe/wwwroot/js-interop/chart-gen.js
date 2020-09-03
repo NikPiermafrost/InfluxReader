@@ -8,14 +8,12 @@ var chart;
 //chartjs initializer
 var genChart = (values) => {
     chart = new Chart(ctx, {
-        // The type of chart we want to create
         type: 'line',
-        // The data for our dataset
         data: {
             labels: values.map(x => x.Time),
             datasets: [{
                 label: 'Dataset',
-                backgroundColor: 'rgb(255, 99, 132)',
+                //backgroundColor: 'rgb(255, 99, 132)',
                 borderColor: 'rgb(255, 99, 132)',
                 data: values.map(x => x.Value)
             }]
