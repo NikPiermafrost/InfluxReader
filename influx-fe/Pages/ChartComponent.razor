@@ -11,7 +11,10 @@
                 <label class="px-3">To: </label>
                 <input type="date" class="form-comtrol pr-3" @bind="@EndDate"/>
             </div>
-            <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => UpdateDataTimeStamp())">Update Data</button>
+            <div>
+                <button type="button" class="btn btn-sm btn-primary mr-3" @onclick="@(() => UpdateDataTimeStamp())">Update Data</button>
+                <button type="button" class="btn btn-sm btn-primary">Start Simulation</button>
+            </div>
         </div>
     </div>
     <div class="card-body" style="min-height: 600px;">
@@ -22,18 +25,7 @@
             </div>
         }
     </div>
-    <div class="card-footer" style="height: 50px;">
-        @*@if (List != null)
-        {
-            <div class="d-flex">
-                <div class="flex-grow-1 pr-5">
-                    <input type="range" min="1" max="@(List.Count - 1)" step="1" value="@(List.Count - 1)" class="form-control" @oninput="@((ChangeEventArgs e) => ChangeSlider(int.Parse((string)e.Value)))" />
-                </div>
-                <div>
-                    <button class="btn btn-primary">Start Simulation</button>
-                </div>
-            </div>
-        }*@
+    <div class="card-footer">
         @if (List != null && List.Count > 1)
         {
             <div id="range-slider"></div>

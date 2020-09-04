@@ -55,9 +55,9 @@ var replayChart;
 var replayChartarray;
 
 //furst initialization of the replay chart
-var initReplayChart = (arrStart, arrEnd) => {
+var initReplayChart = () => {
     replayCtx = document.getElementById('replay-chart').getContext('2d');
-    replayChartarray = arr.slice(arrStart, arrEnd + 1);
+    replayChartarray = arr.slice(initialArrayPosition, finalArrayPosition + 1);
     genReplayChart(replayChartarray);
 }
 
