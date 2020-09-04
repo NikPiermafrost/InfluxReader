@@ -49,6 +49,7 @@ else
         {
             IntList = await res.Content.ReadFromJsonAsync<List<IntModel>>();
             await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(IntList));
+            await JSRuntime.InvokeVoidAsync("updateSliderValue", IntList.Count - 1);
             StateHasChanged();
         }
     }

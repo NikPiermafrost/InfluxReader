@@ -133,3 +133,35 @@ var clearSimulationChart = () => {
     replayChart.data.datasets[0].data = [];
     replayChart.update();
 }
+
+var rangeSlider;
+
+var initSlider = (maxArrCount) => {
+    rangeSlider = document.getElementById('range-slider');
+
+    noUiSlider.create(rangeSlider, {
+        range: {
+            'min': 0,
+            'max': maxArrCount
+        },
+        step: 100 / maxArrCount,
+        start: [0, maxArrCount],
+        connect: true,
+        orientation: 'horizontal',
+        direction: 'ltr',
+        tooltips: false,
+        behaviour: 'tap-drag',
+        tooltips: true,
+    });
+}
+
+var updateSliderValue = (newMaxValue) => {
+    rangeSlider.noUiSlider.updateOptions({
+        range = {
+            'min': 0,
+            'max': newMaxValue
+        },
+        step = 100 / newMaxValue
+    }, true);
+    rangeSlider.noUiSlider.set([0, newMaxValue]);
+}
