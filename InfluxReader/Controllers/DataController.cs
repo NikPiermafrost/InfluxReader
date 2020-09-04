@@ -27,7 +27,7 @@ namespace InfluxReader.Controllers
         {
             try
             {
-                var res = await _srv.GetStringEntries(DateTime.Parse(queryString.StartDate), DateTime.Parse(queryString.EndDate));
+                var res = await _srv.GetStringEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
                 return Ok(res);
             }
             catch (Exception ex)
@@ -43,7 +43,7 @@ namespace InfluxReader.Controllers
         {
             try
             {
-                var res = await _srv.GetBoolEntries(DateTime.Parse(queryString.StartDate), DateTime.Parse(queryString.EndDate));
+                var res = await _srv.GetBoolEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
                 return Ok(res);
             }
             catch (Exception ex)
@@ -59,7 +59,7 @@ namespace InfluxReader.Controllers
         {
             try
             {
-                var res = await _srv.GetFloatEntries(DateTime.Parse(queryString.StartDate), DateTime.Parse(queryString.EndDate));
+                var res = await _srv.GetFloatEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
                 return Ok(res);
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace InfluxReader.Controllers
         {
             try
             {
-                var res = await _srv.GetIntEntries(DateTime.Parse(queryString.StartDate), DateTime.Parse(queryString.EndDate));
+                var res = await _srv.GetIntEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
                 return Ok(res);
             }
             catch (Exception ex)

@@ -7,11 +7,11 @@
         <div class="d-flex justify-content-between">
             <div class="d-flex">
                 <label class="pr-3">From: </label>
-                <input type="date" class="form-comtrol pr-3" @bind="@StartDate" min="@MinDate.ToString("yyyy-MM-dd")" max="@MaxDate.ToString("yyyy-MM-dd")" />
+                <input type="date" class="form-comtrol pr-3" @bind="@StartDate"/>
                 <label class="px-3">To: </label>
-                <input type="date" class="form-comtrol pr-3" @bind="@EndDate" min="@MinDate.ToString("yyyy-MM-dd")" max="@MaxDate.ToString("yyyy-MM-dd")" />
+                <input type="date" class="form-comtrol pr-3" @bind="@EndDate"/>
             </div>
-            <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => StartSimulation())" disabled="@IsSimInitialized">Update Data</button>
+            <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => UpdateDataTimeStamp())">Update Data</button>
         </div>
     </div>
     <div class="card-body" style="min-height: 600px;">
@@ -23,7 +23,7 @@
         }
     </div>
     <div class="card-footer">
-        @if (List != null)
+        @*@if (List != null)
         {
             <div class="d-flex">
                 <div class="flex-grow-1 pr-5">
@@ -33,16 +33,14 @@
                     <button class="btn btn-primary">Start Simulation</button>
                 </div>
             </div>
-        }
+        }*@
     </div>
 </div>
 
 @code {
 
     private int SliderValue = 0;
-    private DateTime MinDate = DateTime.Now;
-    private DateTime MaxDate = DateTime.Now;
-    private DateTime StartDate = DateTime.Now;
+    private DateTime StartDate = DateTime.Today;
     private DateTime EndDate = DateTime.Now;
     private bool IsSimInitialized = false;
 
@@ -50,13 +48,11 @@
     public List<IntModel> List { get; set; }
 
     [Parameter]
-    public EventCallback<SimulationValues> EmitStart { get; set; }
+    public EventCallback<DataTimeStamps> CallNewData { get; set; }
 
     protected override void OnInitialized()
     {
         SliderValue = List.Count - 1;
-        MinDate = List.Min(x => x.Time);
-        MaxDate = List.Max(x => x.Time);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -72,27 +68,37 @@
         JSRuntime.InvokeVoidAsync("editData", value);
     }
 
-    private async Task StartSimulation()
-    {
-        var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
-                                    && x.Time.Date <= MaxDate.Date).ToList();
-        IsSimInitialized = true;
-        if (tmpArray.Count > 0)
-        {
-            var toEmit = new SimulationValues()
-            {
-                StartArray = List.IndexOf(tmpArray.First()),
-                EndArray = List.IndexOf(tmpArray.Last())
-            };
-            await EmitStart.InvokeAsync(toEmit);
-        }
-    }
+    //private async Task StartSimulation()
+    //{
+    //    var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
+    //                                && x.Time.Date <= MaxDate.Date).ToList();
+    //    IsSimInitialized = true;
+    //    if (tmpArray.Count > 0)
+    //    {
+    //        var toEmit = new SimulationValues()
+    //        {
+    //            StartArray = List.IndexOf(tmpArray.First()),
+    //            EndArray = List.IndexOf(tmpArray.Last())
+    //        };
+    //        await EmitStart.InvokeAsync(toEmit);
+    //    }
+    //}
 
-    private async Task ResetDataSimulation()
+    //private async Task ResetDataSimulation()
+    //{
+    //    var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
+    //                                && x.Time.Date <= MaxDate.Date).ToList();
+    //    await JSRuntime.InvokeVoidAsync("resetDataReplay", List.IndexOf(tmpArray.First()), List.IndexOf(tmpArray.Last()));
+    //}
+
+    private async Task UpdateDataTimeStamp()
     {
-        var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
-                                    && x.Time.Date <= MaxDate.Date).ToList();
-        await JSRuntime.InvokeVoidAsync("resetDataReplay", List.IndexOf(tmpArray.First()), List.IndexOf(tmpArray.Last()));
+        var toEmit = new DataTimeStamps()
+        {
+            DateEnd = EndDate.Date == StartDate.Date ? DateTime.Now : EndDate,
+            DateStart = EndDate.Date == StartDate.Date ? DateTime.Today : StartDate
+        };
+        await CallNewData.InvokeAsync(toEmit);
     }
 
 }

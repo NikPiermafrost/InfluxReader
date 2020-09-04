@@ -7,7 +7,7 @@ namespace DataAccess.Models
 {
     public class SetDateQueryString
     {
-        public string StartDate { get; set; }
-        public string EndDate { get; set; }
+        public long StartDate { get; set; }
+        public long EndDate { get; set; }
     }
 }

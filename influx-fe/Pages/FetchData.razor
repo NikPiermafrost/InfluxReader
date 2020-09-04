@@ -10,35 +10,46 @@
 else
 {
     <div class="container-fluid">
-        <div class="row">
-            <div class="@(ActiveReplay ? "col-6" : "col-12")">
-                <ChartComponent List="IntList" EmitStart="@InitReplay"></ChartComponent>
-            </div>
-            @if (ActiveReplay)
-            {
-                <ReplayComponent ArrayStart="SimulationValues.StartArray" ArrayEnd="SimulationValues.EndArray"></ReplayComponent>
-            }
-        </div>
+        <ChartComponent List="IntList" CallNewData="@UpdateGraphData"></ChartComponent>
     </div>
 }
 
 @code {
     private List<IntModel> IntList;
-    private bool ActiveReplay = false;
     private SimulationValues SimulationValues = new SimulationValues();
+    private string baseUrl => "https://localhost:44387/api/Data/RandomInt";
 
     protected override async Task OnInitializedAsync()
     {
-        IntList = await Http.GetFromJsonAsync<List<IntModel>>("https://localhost:44387/api/Data/RandomInt");
+        var InitialDataRequest = QueryParser(DateTime.Today, DateTime.Now);
+        IntList = await Http.GetFromJsonAsync<List<IntModel>>(InitialDataRequest);
     }
 
-    public void InitReplay(SimulationValues values)
+    //public void InitReplay(SimulationValues values)
+    //{
+    //    if (values.EndArray != values.StartArray)
+    //    {
+    //        SimulationValues = values;
+    //    }
+    //    StateHasChanged();
+    //}
+
+    public string QueryParser(DateTime StartDate, DateTime EndDate)
     {
-        if (values.EndArray != values.StartArray)
+        var resultQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        resultQueryString.Add(nameof(StartDate), StartDate.Ticks.ToString());
+        resultQueryString.Add(nameof(EndDate), EndDate.Ticks.ToString());
+        return string.Concat(baseUrl, "?", resultQueryString);
+    }
+
+    public async Task UpdateGraphData(DataTimeStamps dataTimeStamps)
+    {
+        var res = await Http.GetAsync(QueryParser(dataTimeStamps.DateStart, dataTimeStamps.DateEnd));
+        if (res.IsSuccessStatusCode)
         {
-            SimulationValues = values;
-            ActiveReplay = true;
+            IntList = await res.Content.ReadFromJsonAsync<List<IntModel>>();
+            await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(IntList));
+            StateHasChanged();
         }
-        StateHasChanged();
     }
 }

@@ -24,6 +24,14 @@ var genChart = (values) => {
     });
 }
 
+//create new dataset for graph
+var newDataset = (newArray) => {
+    arr = JSON.parse(newArray);
+    chart.data.labels = arr.map(x => x.Time);
+    chart.data.datasets[0].data = arr.map(x => x.Value);
+    chart.update();
+}
+
 //json parser from api data
 var chartInitializer = (data) => {
     ctx = document.getElementById('integer-chart').getContext('2d');
@@ -36,13 +44,6 @@ var editData = (value) => {
     var tmpArray = arr.slice(0, value + 1);
     chart.data.labels = tmpArray.map(x => x.Time);
     chart.data.datasets[0].data = tmpArray.map(x => x.Value);
-    chart.update();
-}
-
-//create new dataset for graph
-var newDataset = (newArray) => {
-    chart.data.labels = newArray.map(x => x.Time);
-    chart.data.datasets[0].data = newArray.map(x => x.Value);
     chart.update();
 }
 
