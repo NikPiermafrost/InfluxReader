@@ -11,22 +11,24 @@ namespace influx_fe.Services
 {
     public class RabbitSender: IRabbitSender
     {
-        private readonly ConfigurationModel _conf;
-        private readonly IConnectionFactory _connectionFactory;
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
+        readonly ConfigurationModel _conf;
+        readonly IConnectionFactory _connectionFactory;
+        readonly IConnection _connection;
+        readonly IModel _channel;
 
         public RabbitSender(ConfigurationModel configuration)
         {
             _conf = configuration;
-            _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname};
+            _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname };
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
+            Console.WriteLine(_conf.Hostname);
         }
         public void SendReplayDataToRabbit(string Data)
         {
             try
             {
+                Console.WriteLine(Data);
                 _channel.QueueDeclare(queue: _conf.Queue, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
                 var body = Encoding.UTF8.GetBytes(Data);
@@ -36,7 +38,7 @@ namespace influx_fe.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.InnerException);
             }
         }
     }

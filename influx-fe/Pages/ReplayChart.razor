@@ -1,6 +1,8 @@
 ﻿@page "/fetchdata/simulation"
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
+@using influx_fe.Services
+@inject IRabbitSender RabbitSender
 
 <div class="container-fluid">
     <div class="card">
@@ -36,12 +38,24 @@
 
     private int Zoomlevel = 5;
 
+    private static Action<string> dataReceiver;
+
+    protected override void OnInitialized()
+    {
+        dataReceiver = SendToRabbit;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await JSRuntime.InvokeVoidAsync("initReplayChart");
         }
+    }
+
+    private void SendToRabbit(string Data)
+    {
+        RabbitSender.SendReplayDataToRabbit(Data);
     }
 
     private async Task RunSimulation()
@@ -62,5 +76,11 @@
     private async Task ResetSimulation()
     {
         await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
+    }
+
+    [JSInvokable]
+    public static void receiveRabbitDataFromJs(string Data)
+    {
+        dataReceiver.Invoke(Data);
     }
 }

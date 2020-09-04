@@ -59,11 +59,18 @@ var replayChart;
 //replay chart array
 var replayChartarray;
 
+var dataForRabbit = [];
+
 //furst initialization of the replay chart
 var initReplayChart = () => {
     replayCtx = document.getElementById('replay-chart').getContext('2d');
     replayChartarray = arr.slice(initialArrayPosition, finalArrayPosition + 1);
     genReplayChart(replayChartarray);
+}
+
+var sendforRabbit = () => {
+    DotNet.invokeMethodAsync('influx-fe', 'receiveRabbitDataFromJs', JSON.stringify(dataForRabbit));
+    dataForRabbit = [];
 }
 
 //initialization of the chart object
@@ -137,12 +144,14 @@ var loopSimulation = (ms, zoom) => {
 
 var stopExecution = () => {
     clearInterval(executionHandler);
+    sendforRabbit();
 }
 
 //adds the next field for the simulation
 var addDataToSimulation = (arrPosition) => {
     replayChart.data.labels.push(new Date(replayChartarray[arrPosition].Time).toLocaleString());
     replayChart.data.datasets[0].data.push(replayChartarray[arrPosition].Value);
+    dataForRabbit.push({ time: replayChartarray[arrPosition].Time, value: replayChartarray[arrPosition].Value});
 }
 
 //removes the first field for the simulation
@@ -157,6 +166,9 @@ var resetAfterSimulation = () => {
     replayChart.data.datasets[0].data = replayChartarray.map(x => x.Value);
     stopExecution();
     replayChart.update();
+    if (dataForRabbit.length > 0) {
+        sendforRabbit();
+    }
 }
 
 //empties the chart for initialization
@@ -164,6 +176,9 @@ var clearSimulationChart = () => {
     replayChart.data.labels = [];
     replayChart.data.datasets[0].data = [];
     replayChart.update();
+    if (dataForRabbit.length > 0) {
+        sendforRabbit();
+    }
 }
 
 //double slider obj
