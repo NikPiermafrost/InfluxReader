@@ -10,7 +10,7 @@ var genChart = (values) => {
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: values.map(x => x.Time),
+            labels: values.map(x => new Date(x.Time).toLocaleString()),
             datasets: [{
                 label: 'Dataset',
                 backgroundColor: 'rgb(255, 99, 132)',
@@ -27,7 +27,7 @@ var genChart = (values) => {
 //create new dataset for graph
 var newDataset = (newArray) => {
     arr = JSON.parse(newArray);
-    chart.data.labels = arr.map(x => x.Time);
+    chart.data.labels = arr.map(x => new Date(x.Time).toLocaleString());
     chart.data.datasets[0].data = arr.map(x => x.Value);
     chart.update();
 }
@@ -40,9 +40,9 @@ var chartInitializer = (data) => {
 }
 
 //pilot with slider
-var editData = (value) => {
-    var tmpArray = arr.slice(0, value + 1);
-    chart.data.labels = tmpArray.map(x => x.Time);
+var editData = (values) => {
+    var tmpArray = arr.slice(values[0], values[1] + 1);
+    chart.data.labels = tmpArray.map(x => new Date(x.Time).toLocaleString());
     chart.data.datasets[0].data = tmpArray.map(x => x.Value);
     chart.update();
 }
@@ -68,7 +68,7 @@ var genReplayChart = (values) => {
         type: 'line',
         // The data for our dataset
         data: {
-            labels: values.map(x => x.Time),
+            labels: values.map(x => new Date(x.Time).toLocaleString()),
             datasets: [{
                 label: 'Dataset',
                 backgroundColor: 'rgb(99, 255, 132)',
@@ -76,7 +76,6 @@ var genReplayChart = (values) => {
                 data: values.map(x => x.Value)
             }]
         },
-
         // Configuration options go here
         options: {}
     });
@@ -134,34 +133,50 @@ var clearSimulationChart = () => {
     replayChart.update();
 }
 
+//double slider obj
 var rangeSlider;
-
+var initialArrayPosition;
+var finalArrayPosition;
+//initializes the range slider
 var initSlider = (maxArrCount) => {
     rangeSlider = document.getElementById('range-slider');
-
     noUiSlider.create(rangeSlider, {
         range: {
             'min': 0,
             'max': maxArrCount
         },
-        step: 100 / maxArrCount,
+        step: 1,
         start: [0, maxArrCount],
         connect: true,
         orientation: 'horizontal',
         direction: 'ltr',
         tooltips: false,
-        behaviour: 'tap-drag',
-        tooltips: true,
+        behaviour: 'tap-drag'
     });
+    initialArrayPosition = 0;
+    finalArrayPosition = parseInt(maxArrCount);
+    catchSliderEvents();
 }
 
+//updates the handle values
 var updateSliderValue = (newMaxValue) => {
     rangeSlider.noUiSlider.updateOptions({
-        range = {
+        range: {
             'min': 0,
             'max': newMaxValue
-        },
-        step = 100 / newMaxValue
+        }
     }, true);
     rangeSlider.noUiSlider.set([0, newMaxValue]);
+    initialArrayPosition = 0;
+    finalArrayPosition = parseInt(newMaxValue);
+}
+
+//handles the updated values
+var catchSliderEvents = () => {
+    rangeSlider.noUiSlider.on('update', () => {
+        var sliders = rangeSlider.noUiSlider.get();
+        initialArrayPosition = parseInt(sliders[0]);
+        finalArrayPosition = parseInt(sliders[1]);
+        editData([initialArrayPosition, finalArrayPosition]);
+    });
 }
