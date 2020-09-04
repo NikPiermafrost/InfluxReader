@@ -24,15 +24,15 @@ namespace DataAccess
             _client = new InfluxDBClient(ipAddress, userName, password);
         }
 
-        public async Task<List<BoolModel>> GetBoolEntries()
+        public async Task<List<BoolModel>> GetBoolEntries(DateTime DateStart, DateTime DateEnd)
         {
-            var result = await _client.QueryMultiSeriesAsync<BoolModel>(_dbName, "SELECT * FROM IsLorem");
+            var result = await _client.QueryMultiSeriesAsync<BoolModel>(_dbName, $"SELECT * FROM IsLorem WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
             return result.First().Entries.ToList();
         }
 
-        public async Task<List<FloatModel>> GetFloatEntries()
+        public async Task<List<FloatModel>> GetFloatEntries(DateTime DateStart, DateTime DateEnd)
         {
-            var result = await _client.QueryMultiSeriesAsync<FloatModel>(_dbName, "SELECT * FROM RandomInt");
+            var result = await _client.QueryMultiSeriesAsync<FloatModel>(_dbName, $"SELECT * FROM RandomInt WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
             return result.First().Entries.ToList();
         }
 
@@ -42,9 +42,9 @@ namespace DataAccess
             return result.First().Entries.ToList();
         }
 
-        public async Task<List<StringModel>> GetStringEntries()
+        public async Task<List<StringModel>> GetStringEntries(DateTime DateStart, DateTime DateEnd)
         {
-            var result = await _client.QueryMultiSeriesAsync<StringModel>(_dbName, "SELECT * FROM LoremIpsum");
+            var result = await _client.QueryMultiSeriesAsync<StringModel>(_dbName, $"SELECT * FROM LoremIpsum WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
             return result.First().Entries.ToList();
         }
 

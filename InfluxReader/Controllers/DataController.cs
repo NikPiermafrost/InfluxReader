@@ -23,7 +23,7 @@ namespace InfluxReader.Controllers
         [ProducesResponseType(typeof(List<StringModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("LoremIpsum")]
-        public async Task<IActionResult> GetLorem()
+        public async Task<IActionResult> GetLorem([FromQuery] SetDateQueryString queryString)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace InfluxReader.Controllers
         [ProducesResponseType(typeof(List<BoolModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("IsLorem")]
-        public async Task<IActionResult> GetBools()
+        public async Task<IActionResult> GetBools([FromQuery] SetDateQueryString queryString)
         {
             try
             {
@@ -55,7 +55,7 @@ namespace InfluxReader.Controllers
         [ProducesResponseType(typeof(List<FloatModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("RandomFloat")]
-        public async Task<IActionResult> GetFloats()
+        public async Task<IActionResult> GetFloats([FromQuery] SetDateQueryString queryString)
         {
             try
             {
