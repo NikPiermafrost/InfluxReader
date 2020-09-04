@@ -7,6 +7,6 @@ namespace influx_fe.Services
 {
     public interface IRabbitSender
     {
-        void test();
+        void SendReplayDataToRabbit(string Data);
     }
 }
