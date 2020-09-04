@@ -3,7 +3,7 @@
 @using influx_fe.Models
 @inject IJSRuntime JSRuntime
 
-@if (IntList == null)
+@if (!valuesLoaded)
 {
     <p><em>Loading...</em></p>
 }
@@ -16,32 +16,79 @@ else
 
 @code {
     private List<IntModel> IntList;
+    private List<FloatModel> FloatList;
+    private bool loading = true;
+    private bool valuesLoaded = false;
     private SimulationValues SimulationValues = new SimulationValues();
-    private string baseUrl => "https://localhost:44387/api/Data/RandomInt";
+    private string baseUrl => "https://localhost:44387/api/Data/";
 
     protected override async Task OnInitializedAsync()
     {
-        var InitialDataRequest = QueryParser(DateTime.Today, DateTime.Now);
-        IntList = await Http.GetFromJsonAsync<List<IntModel>>(InitialDataRequest);
+        var InitialIntRequest = QueryParser(DateTime.Today, DateTime.Now, "RandomInt");
+        var InitialFloatRequest = QueryParser(DateTime.Today, DateTime.Now, "RandomFloat");
+        var getInts = await Http.GetAsync(InitialIntRequest);
+        var getFloats = await Http.GetAsync(InitialFloatRequest);
+        if (getInts.IsSuccessStatusCode)
+        {
+            IntList = await getInts.Content.ReadFromJsonAsync<List<IntModel>>();
+            loading = false;
+        }
+        else
+        {
+            loading = true;
+        }
+        if (getFloats.IsSuccessStatusCode)
+        {
+            FloatList = await getFloats.Content.ReadFromJsonAsync<List<FloatModel>>();
+            loading = false;
+        }
+        else
+        {
+            loading = true;
+        }
+        valuesLoaded = !loading;
+
     }
 
-    public string QueryParser(DateTime StartDate, DateTime EndDate)
+    public string QueryParser(DateTime StartDate, DateTime EndDate, string apiPath)
     {
         var resultQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
         resultQueryString.Add(nameof(StartDate), StartDate.Ticks.ToString());
         resultQueryString.Add(nameof(EndDate), EndDate.Ticks.ToString());
-        return string.Concat(baseUrl, "?", resultQueryString);
+        return string.Concat(baseUrl, apiPath, "?", resultQueryString);
     }
 
     public async Task UpdateGraphData(DataTimeStamps dataTimeStamps)
     {
-        var res = await Http.GetAsync(QueryParser(dataTimeStamps.DateStart, dataTimeStamps.DateEnd));
+        var res = await Http.GetAsync(QueryParser(dataTimeStamps.DateStart, dataTimeStamps.DateEnd, "RandomInt"));
         if (res.IsSuccessStatusCode)
         {
             IntList = await res.Content.ReadFromJsonAsync<List<IntModel>>();
-            await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(IntList));
-            await JSRuntime.InvokeVoidAsync("updateSliderValue", IntList.Count - 1);
-            StateHasChanged();
+        }
+        var floatRes = await Http.GetAsync(QueryParser(dataTimeStamps.DateStart, dataTimeStamps.DateEnd, "RandomFloat"));
+        if (floatRes.IsSuccessStatusCode)
+        {
+            FloatList = await floatRes.Content.ReadFromJsonAsync<List<FloatModel>>();
+        }
+        await UpdateGraph(dataTimeStamps.DataRequested);
+    }
+
+    public async Task UpdateGraph(int dataToLoad)
+    {
+        switch (dataToLoad)
+        {
+            case 0:
+                await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(IntList));
+                await JSRuntime.InvokeVoidAsync("updateSliderValue", IntList.Count - 1);
+                break;
+            case 1:
+                await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(FloatList));
+                await JSRuntime.InvokeVoidAsync("updateSliderValue", FloatList.Count - 1);
+                break;
+            default:
+                await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(IntList));
+                await JSRuntime.InvokeVoidAsync("updateSliderValue", IntList.Count - 1);
+                break;
         }
     }
 }

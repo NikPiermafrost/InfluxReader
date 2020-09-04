@@ -9,5 +9,6 @@ namespace influx_fe.Models
     {
         public DateTime DateStart { get; set; }
         public DateTime DateEnd { get; set; }
+        public int DataRequested { get; set; }
     }
 }

@@ -12,9 +12,13 @@
                 <label class="mx-3">To: </label>
                 <input type="date" class="form-control form-control-sm mr-3" @bind="@EndDate" />
             </div>
-            <div>
-                <button type="button" class="btn btn-sm btn-primary mr-3" @onclick="@(() => UpdateDataTimeStamp())">Update Data</button>
-                <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => NavigationManager.NavigateTo("/fetchdata/simulation"))">Start Simulation</button>
+            <div class="d-flex">
+                <select @bind="SelectedData" class="form-control form-control-sm mr-3">
+                    <option value=0>Random Ints</option>
+                    <option value=1>Random Floats</option>
+                </select>
+                <button type="button" class="btn btn-sm btn-primary mr-3" @onclick="@(() => UpdateDataTimeStamp())">Update</button>
+                <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => NavigationManager.NavigateTo("/fetchdata/simulation"))">Start</button>
             </div>
         </div>
     </div>
@@ -40,6 +44,7 @@
     private DateTime StartDate = DateTime.Today;
     private DateTime EndDate = DateTime.Now;
     private bool IsSimInitialized = false;
+    private int SelectedData = 0;
 
     [Parameter]
     public List<IntModel> List { get; set; }
@@ -66,7 +71,8 @@
         var toEmit = new DataTimeStamps()
         {
             DateEnd = EndDate.Date == StartDate.Date ? DateTime.Now : EndDate,
-            DateStart = EndDate.Date == StartDate.Date ? DateTime.Today : StartDate
+            DateStart = EndDate.Date == StartDate.Date ? DateTime.Today : StartDate,
+            DataRequested = SelectedData
         };
         await CallNewData.InvokeAsync(toEmit);
     }
