@@ -71,11 +71,11 @@ namespace InfluxReader.Controllers
         [ProducesResponseType(typeof(List<IntModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [HttpGet("RandomInt")]
-        public async Task<IActionResult> GetInts()
+        public async Task<IActionResult> GetInts([FromQuery] SetDateQueryString queryString)
         {
             try
             {
-                var res = await _srv.GetIntEntries(DateTime.Parse("2020-09-03T09:00"), DateTime.Parse("2020-09-03T09:05"));
+                var res = await _srv.GetIntEntries(DateTime.Parse(queryString.StartDate), DateTime.Parse(queryString.EndDate));
                 return Ok(res);
             }
             catch (Exception ex)
