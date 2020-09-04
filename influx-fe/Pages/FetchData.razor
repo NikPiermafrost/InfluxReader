@@ -25,15 +25,6 @@ else
         IntList = await Http.GetFromJsonAsync<List<IntModel>>(InitialDataRequest);
     }
 
-    //public void InitReplay(SimulationValues values)
-    //{
-    //    if (values.EndArray != values.StartArray)
-    //    {
-    //        SimulationValues = values;
-    //    }
-    //    StateHasChanged();
-    //}
-
     public string QueryParser(DateTime StartDate, DateTime EndDate)
     {
         var resultQueryString = System.Web.HttpUtility.ParseQueryString(string.Empty);

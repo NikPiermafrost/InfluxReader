@@ -1,42 +1,37 @@
-﻿@inject IJSRuntime JSRuntime
-@using influx_fe.Models
-@using Newtonsoft.Json
+﻿@page "/fetchdata/simulation"
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
-<div class="col-6">
+<div class="container-fluid">
     <div class="card">
         <div class="card-header">
-            <h4>Replay</h4>
+            <div class="d-flex justify-content-between">
+                <div class="d-flex">
+                    <label class="mr-3" for="looptime">Frequency(ms):</label>
+                    <input id="looptime" type="number" class="form-control form-control-sm mr-3" @bind="LoopTime" />
+                    <label for="zoom" class="mr-3">Zoom: </label>
+                    <input id="zoom" type="number" class="form-control form-control-sm" @bind="Zoomlevel" />
+                </div>
+                <button class="btn btn-primary btn-sm" @onclick="@(() => NavigationManager.NavigateTo("/fetchdata"))">Back to data</button>
+            </div>
         </div>
         <div class="card-body" style="min-height: 600px;">
             <canvas id="replay-chart" style="width: 100%;  height: 600px !important"></canvas>
         </div>
         <div class="card-footer">
             <div class="d-flex justify-content-between">
-                <div class="form-row">
-                    <label class="col-6">loop Time (ms)</label>
-                    <div class="col-6">
-                        <input type="number" class="form-control" @bind="LoopTime" />
-                    </div>
-                </div>
-                <div class="form-row">
-                    <label class="col-6">Elements Shown</label>
-                    <div class="col-6">
-                        <input type="number" class="form-control" @bind="Zoomlevel" />
-                    </div>
+                <button type="button" class="btn btn-warning" @onclick="@ResetSimulation">Reset Simulation</button>
+                <div>
+                    <button type="button" class="btn btn-success mr-3" @onclick="@RunSimulation">Start simulation</button>
+                    <button type="button" class="btn btn-primary mr-3" @onclick="@LoopSimulation">loop simulation</button>
+                    <button type="button" class="btn btn-danger mr-3" @onclick="@StopSimulation">Stop simulation</button>
                 </div>
             </div>
-            <button type="button" class="btn btn-primary" @onclick="@RunSimulation">Start simulation</button>
         </div>
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public int ArrayStart { get; set; }
-
-    [Parameter]
-    public int ArrayEnd { get; set; }
-
     private int LoopTime = 500;
 
     private int Zoomlevel = 5;
@@ -45,12 +40,27 @@
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("initReplayChart", ArrayStart, ArrayEnd);
+            await JSRuntime.InvokeVoidAsync("initReplayChart");
         }
     }
 
     private async Task RunSimulation()
     {
         await JSRuntime.InvokeVoidAsync("initializeSimulation", LoopTime, Zoomlevel);
+    }
+
+    private async Task LoopSimulation()
+    {
+        await JSRuntime.InvokeVoidAsync("loopSimulation", LoopTime, Zoomlevel);
+    }
+
+    private async Task StopSimulation()
+    {
+        await JSRuntime.InvokeVoidAsync("stopExecution");
+    }
+
+    private async Task ResetSimulation()
+    {
+        await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
     }
 }

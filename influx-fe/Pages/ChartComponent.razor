@@ -1,19 +1,20 @@
 ﻿@inject IJSRuntime JSRuntime
 @using influx_fe.Models
 @using Newtonsoft.Json
+@inject NavigationManager NavigationManager
 
 <div class="card">
     <div class="card-header">
         <div class="d-flex justify-content-between">
             <div class="d-flex">
-                <label class="pr-3">From: </label>
-                <input type="date" class="form-comtrol pr-3" @bind="@StartDate"/>
-                <label class="px-3">To: </label>
-                <input type="date" class="form-comtrol pr-3" @bind="@EndDate"/>
+                <label class="mr-3">From: </label>
+                <input type="date" class="form-control form-control-sm mr-3" @bind="@StartDate" />
+                <label class="mx-3">To: </label>
+                <input type="date" class="form-control form-control-sm mr-3" @bind="@EndDate" />
             </div>
             <div>
                 <button type="button" class="btn btn-sm btn-primary mr-3" @onclick="@(() => UpdateDataTimeStamp())">Update Data</button>
-                <button type="button" class="btn btn-sm btn-primary">Start Simulation</button>
+                <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => NavigationManager.NavigateTo("/fetchdata/simulation"))">Start Simulation</button>
             </div>
         </div>
     </div>
@@ -59,22 +60,6 @@
             await JSRuntime.InvokeVoidAsync("initSlider", List.Count - 1);
         }
     }
-
-    //private async Task StartSimulation()
-    //{
-    //    var tmpArray = List.Where(x => x.Time.Date >= MinDate.Date
-    //                                && x.Time.Date <= MaxDate.Date).ToList();
-    //    IsSimInitialized = true;
-    //    if (tmpArray.Count > 0)
-    //    {
-    //        var toEmit = new SimulationValues()
-    //        {
-    //            StartArray = List.IndexOf(tmpArray.First()),
-    //            EndArray = List.IndexOf(tmpArray.Last())
-    //        };
-    //        await EmitStart.InvokeAsync(toEmit);
-    //    }
-    //}
 
     private async Task UpdateDataTimeStamp()
     {

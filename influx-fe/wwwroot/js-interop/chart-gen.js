@@ -13,14 +13,19 @@ var genChart = (values) => {
             labels: values.map(x => new Date(x.Time).toLocaleString()),
             datasets: [{
                 label: 'Dataset',
-                backgroundColor: 'rgb(255, 99, 132)',
-                borderColor: 'rgb(255, 99, 132)',
+                fill : false,
+                borderColor: '#F24B4B',
                 data: values.map(x => x.Value)
             }]
         },
 
         // Configuration options go here
-        options: {}
+        options: {
+            responsive: true,
+            animation: {
+                duration: 0,
+            }
+        }
     });
 }
 
@@ -71,29 +76,32 @@ var genReplayChart = (values) => {
             labels: values.map(x => new Date(x.Time).toLocaleString()),
             datasets: [{
                 label: 'Dataset',
-                backgroundColor: 'rgb(99, 255, 132)',
-                borderColor: 'rgb(99, 255, 132)',
+                fill: false,
+                borderColor: '#F24B4B',
                 data: values.map(x => x.Value)
             }]
         },
         // Configuration options go here
-        options: {}
+        options: {
+            responsive: true,
+            animation: {
+                duration: 0,
+            }
+        }
     });
 }
 
-//replay chart updater
-var resetDataReplay = (arrStart, arrEnd) => {
-    replayChartarray = arr.slice(arrStart, arrEnd + 1);
-    replayChart.data.labels = replayChartarray.map(x => x.Time);
-    replayChart.data.datasets[0].data = replayChartarray.map(x => x.Value);
-    replayChart.update();
-}
+var counter;
+var executionHandler;
 
 //sets the interval for data reproduction
 var initializeSimulation = (ms, zoom) => {
-    var counter = 0;
+    counter = 0;
+    if (executionHandler) {
+        stopExecution();
+    }
     clearSimulationChart();
-    var execution = setInterval(() => {
+    executionHandler = setInterval(() => {
         addDataToSimulation(counter);
         if (zoom < counter && zoom >= 3) {
             removeLastDataToSimulation();
@@ -107,9 +115,33 @@ var initializeSimulation = (ms, zoom) => {
     }, ms);
 }
 
+var loopSimulation = (ms, zoom) => {
+    counter = 0;
+    if (executionHandler) {
+        stopExecution();
+    }
+    clearSimulationChart();
+    executionHandler = setInterval(() => {
+        addDataToSimulation(counter);
+        if (zoom < counter && zoom >= 3) {
+            removeLastDataToSimulation();
+        }
+        replayChart.update()
+        counter++;
+        if (counter === replayChartarray.length) {
+            counter = 0;
+            clearSimulationChart();
+        }
+    }, ms);
+}
+
+var stopExecution = () => {
+    clearInterval(executionHandler);
+}
+
 //adds the next field for the simulation
 var addDataToSimulation = (arrPosition) => {
-    replayChart.data.labels.push(replayChartarray[arrPosition].Time);
+    replayChart.data.labels.push(new Date(replayChartarray[arrPosition].Time).toLocaleString());
     replayChart.data.datasets[0].data.push(replayChartarray[arrPosition].Value);
 }
 
@@ -121,8 +153,9 @@ var removeLastDataToSimulation = () => {
 
 //resets the graph after simulation is completed
 var resetAfterSimulation = () => {
-    replayChart.data.labels = replayChartarray.map(x => x.Time);
+    replayChart.data.labels = replayChartarray.map(x => new Date(x.Time).toLocaleString());
     replayChart.data.datasets[0].data = replayChartarray.map(x => x.Value);
+    stopExecution();
     replayChart.update();
 }
 
