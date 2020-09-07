@@ -71,7 +71,6 @@ var initReplayChart = () => {
 var sendforRabbit = () => {
     DotNet.invokeMethodAsync('influx-fe', 'receiveRabbitDataFromJs', JSON.stringify(dataForRabbit));
     dataForRabbit = [];
-
 }
 
 //initialization of the chart object

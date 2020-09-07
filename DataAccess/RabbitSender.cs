@@ -18,17 +18,10 @@ namespace DataAccess
 
         public RabbitSender(ConfigurationModel configuration)
         {
-            try
-            {
-                _conf = configuration;
-                _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname, UserName = _conf.UserName, Password = _conf.Password, VirtualHost = _conf.Vhost, Port = _conf.Port };
-                _connection = _connectionFactory.CreateConnection();
-                _channel = _connection.CreateModel();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
+            _conf = configuration;
+            _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname, UserName = _conf.UserName, Password = _conf.Password, VirtualHost = _conf.Vhost, Port = _conf.Port };
+            _connection = _connectionFactory.CreateConnection();
+            _channel = _connection.CreateModel();
         }
         public void SendReplayDataToRabbit(string Data)
         {
