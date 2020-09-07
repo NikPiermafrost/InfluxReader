@@ -10,10 +10,10 @@ namespace InfluxReader.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RabbitSender : ControllerBase
+    public class RabbitSenderController : ControllerBase
     {
         private readonly IRabbitSender _rabbitSender;
-        public RabbitSender(IRabbitSender rabbitSender)
+        public RabbitSenderController(IRabbitSender rabbitSender)
         {
             _rabbitSender = rabbitSender;
         }
