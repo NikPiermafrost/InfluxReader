@@ -56,9 +56,7 @@
 
     private void SendToRabbit(string Data)
     {
-        //RabbitSender.SendReplayDataToRabbit(Data);
-        var content = new System.Net.Http.StringContent(Data);
-        HttpClient.PostAsync(baseUrl, content);
+        HttpClient.PostAsJsonAsync(baseUrl, Data);
     }
 
     private async Task RunSimulation()
