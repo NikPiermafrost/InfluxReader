@@ -20,63 +20,19 @@ namespace InfluxReader.Controllers
             _srv = srv;
         }
 
-        [ProducesResponseType(typeof(List<StringModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<ValueModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpGet("LoremIpsum")]
-        public async Task<IActionResult> GetLorem([FromQuery] SetDateQueryString queryString)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] RequestParams qrs)
         {
             try
             {
-                var res = await _srv.GetStringEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
-                return Ok(res);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [ProducesResponseType(typeof(List<BoolModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpGet("IsLorem")]
-        public async Task<IActionResult> GetBools([FromQuery] SetDateQueryString queryString)
-        {
-            try
-            {
-                var res = await _srv.GetBoolEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
-                return Ok(res);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [ProducesResponseType(typeof(List<FloatModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpGet("RandomFloat")]
-        public async Task<IActionResult> GetFloats([FromQuery] SetDateQueryString queryString)
-        {
-            try
-            {
-                var res = await _srv.GetFloatEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
-                return Ok(res);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
-        [ProducesResponseType(typeof(List<IntModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [HttpGet("RandomInt")]
-        public async Task<IActionResult> GetInts([FromQuery] SetDateQueryString queryString)
-        {
-            try
-            {
-                var res = await _srv.GetIntEntries(new DateTime(queryString.StartDate), new DateTime(queryString.EndDate));
-                return Ok(res);
+                var result = new List<ValueModel>();
+                foreach (var entity in qrs.Entities)
+                {
+                    result.Add(await _srv.SelectDataReturn(entity, new DateTime(qrs.StartDate), new DateTime(qrs.EndDate)));
+                }
+                return Ok(result);
             }
             catch (Exception ex)
             {
