@@ -10,13 +10,13 @@ var genChart = (values) => {
     chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: values.map(x => new Date(x.Time).toLocaleString()),
-            datasets: [{
-                label: 'Dataset',
-                fill : false,
-                borderColor: '#F24B4B',
-                data: values.map(x => x.Value)
-            }]
+            labels: values[0].Values.map(x => new Date(x.Time).toLocaleString()),
+            datasets: values.forEach(dataSet => dataSet.Values.map(x => {
+                label = dataSet.EntityName,
+                fill = false,
+                borderColor = '#F24B4B',
+                data = x.Value
+            }))
         },
 
         // Configuration options go here
@@ -46,9 +46,10 @@ var chartInitializer = (data) => {
 
 //pilot with slider
 var editData = (values) => {
-    var tmpArray = arr.slice(values[0], values[1] + 1);
-    chart.data.labels = tmpArray.map(x => new Date(x.Time).toLocaleString());
-    chart.data.datasets[0].data = tmpArray.map(x => x.Value);
+    var tmpArray = [...arr];
+    tmpArray.forEach(dataSet => { dataSet.Values = dataSet.Values.slice(values[0], values[1] + 1) })
+    chart.data.labels = tmpArray[0].Values.map(x => new Date(x.Time).toLocaleString());
+    chart.data.datasets.forEach(x => x.data = tmpArray.forEach(y => y.Values.map(x => x.Value)));
     chart.update();
 }
 

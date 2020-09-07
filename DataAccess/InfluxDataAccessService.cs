@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace DataAccess
@@ -89,6 +90,13 @@ namespace DataAccess
         {
             var epochStart = new DateTime(1970, 1, 1);
             return (Date - epochStart).Ticks * 100;
+        }
+
+        public List<ValueModel> TrimInconsistentData(List<ValueModel> toTrim)
+        {
+            var minArrayCount = toTrim.Min(x => x.Values.Count);
+            toTrim.ForEach(x => x.Values = x.Values.Take(minArrayCount).ToList());
+            return toTrim;
         }
     }
 }

@@ -32,7 +32,8 @@ namespace InfluxReader.Controllers
                 {
                     result.Add(await _srv.SelectDataReturn(entity, new DateTime(qrs.StartDate), new DateTime(qrs.EndDate)));
                 }
-                return Ok(result);
+                var trimmed = _srv.TrimInconsistentData(result);
+                return Ok(trimmed);
             }
             catch (Exception ex)
             {
