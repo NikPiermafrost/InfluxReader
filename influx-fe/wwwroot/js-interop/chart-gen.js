@@ -11,12 +11,14 @@ var genChart = (values) => {
         type: 'line',
         data: {
             labels: values[0].Values.map(x => new Date(x.Time).toLocaleString()),
-            datasets: values.forEach(dataSet => dataSet.Values.map(x => {
-                label = dataSet.EntityName,
-                fill = false,
-                borderColor = '#F24B4B',
-                data = x.Value
-            }))
+            datasets: values.map((item) => {
+                return {
+                    label: item.EntityName,
+                    fill: false,
+                    borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                    data: item.Values.map(x => x.Value)
+                };
+            })
         },
 
         // Configuration options go here
@@ -28,7 +30,6 @@ var genChart = (values) => {
         }
     });
 }
-
 //create new dataset for graph
 var newDataset = (newArray) => {
     arr = JSON.parse(newArray);
@@ -46,10 +47,12 @@ var chartInitializer = (data) => {
 
 //pilot with slider
 var editData = (values) => {
-    var tmpArray = [...arr];
-    tmpArray.forEach(dataSet => { dataSet.Values = dataSet.Values.slice(values[0], values[1] + 1) })
+    var tmpArray = [];
+    arr.forEach((dataSet) => {
+        tmpArray.push({ EntityName: dataSet.EntityName, Values: dataSet.Values.slice(values[0], values[1] + 1) });
+    });
     chart.data.labels = tmpArray[0].Values.map(x => new Date(x.Time).toLocaleString());
-    chart.data.datasets.forEach(x => x.data = tmpArray.forEach(y => y.Values.map(x => x.Value)));
+    chart.data.datasets.forEach((x, i) => x.data = tmpArray[i].Values.map(y => y.Value));
     chart.update();
 }
 

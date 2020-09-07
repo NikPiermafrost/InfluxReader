@@ -26,7 +26,7 @@ else
         {
             StartDate = DateTime.Today.Ticks,
             EndDate = DateTime.Now.Ticks,
-            Entities = new List<string>() { "int", "bool", "float", "string"}
+            Entities = new List<string>() { "string", "int", "bool", "float" }
         };
         var request = await Http.PostAsJsonAsync(baseUrl, InitialParams);
         if (request.IsSuccessStatusCode)
