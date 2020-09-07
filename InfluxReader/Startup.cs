@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataAccess;
+using DataAccess.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,7 +40,19 @@ namespace InfluxReader
             var usrName = Configuration.GetSection("ConfigurationParams").GetSection("usrName").Value;
             var password = Configuration.GetSection("ConfigurationParams").GetSection("password").Value;
             var dbName = Configuration.GetSection("ConfigurationParams").GetSection("dbName").Value;
+            var rabbitConf = new ConfigurationModel()
+            {
+                Exchange = Configuration.GetSection("RabbitSender").GetSection("exchange").Value,
+                RoutingKey = Configuration.GetSection("RabbitSender").GetSection("routingKey").Value,
+                Queue = Configuration.GetSection("RabbitSender").GetSection("queue").Value,
+                Hostname = Configuration.GetSection("RabbitSender").GetSection("hostname").Value,
+                UserName = Configuration.GetSection("RabbitSender").GetSection("userName").Value,
+                Password = Configuration.GetSection("RabbitSender").GetSection("password").Value,
+                Vhost = Configuration.GetSection("RabbitSender").GetSection("vhost").Value,
+                Port = Convert.ToInt32(Configuration.GetSection("RabbitSender").GetSection("port").Value)
+            };
             services.AddTransient<IInfluxDataAccessService>(s => new InfluxDataAccessService(address, usrName, password, dbName));
+            services.AddScoped<IRabbitSender>(s => new RabbitSender(rabbitConf));
             services.AddControllers();
             services.AddSwaggerGen();
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace influx_fe.Services
+namespace DataAccess
 {
     public interface IRabbitSender
     {

@@ -1,4 +1,4 @@
-﻿using influx_fe.Models;
+﻿using DataAccess.Models;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace influx_fe.Services
+namespace DataAccess
 {
     public class RabbitSender: IRabbitSender
     {
@@ -18,11 +18,17 @@ namespace influx_fe.Services
 
         public RabbitSender(ConfigurationModel configuration)
         {
-            _conf = configuration;
-            _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname, UserName = "nicola", Password = "Password1!", VirtualHost = "/" };
-            _connection = _connectionFactory.CreateConnection();
-            _channel = _connection.CreateModel();
-            Console.WriteLine(_conf.Hostname);
+            try
+            {
+                _conf = configuration;
+                _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname, UserName = _conf.UserName, Password = _conf.Password, VirtualHost = _conf.Vhost, Port = _conf.Port };
+                _connection = _connectionFactory.CreateConnection();
+                _channel = _connection.CreateModel();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
         public void SendReplayDataToRabbit(string Data)
         {
@@ -37,7 +43,7 @@ namespace influx_fe.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.InnerException);
+                Console.WriteLine(ex);
             }
         }
     }
