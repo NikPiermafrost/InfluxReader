@@ -19,7 +19,7 @@ namespace influx_fe.Services
         public RabbitSender(ConfigurationModel configuration)
         {
             _conf = configuration;
-            _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname };
+            _connectionFactory = new ConnectionFactory() { HostName = _conf.Hostname, UserName = "nicola", Password = "Password1!", VirtualHost = "/" };
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
             Console.WriteLine(_conf.Hostname);
@@ -28,7 +28,6 @@ namespace influx_fe.Services
         {
             try
             {
-                Console.WriteLine(Data);
                 _channel.QueueDeclare(queue: _conf.Queue, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
                 var body = Encoding.UTF8.GetBytes(Data);

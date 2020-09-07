@@ -71,6 +71,7 @@ var initReplayChart = () => {
 var sendforRabbit = () => {
     DotNet.invokeMethodAsync('influx-fe', 'receiveRabbitDataFromJs', JSON.stringify(dataForRabbit));
     dataForRabbit = [];
+
 }
 
 //initialization of the chart object
@@ -116,7 +117,7 @@ var initializeSimulation = (ms, zoom) => {
         replayChart.update()
         counter++;
         if (counter === replayChartarray.length) {
-            clearInterval(execution);
+            clearInterval(executionHandler);
             resetAfterSimulation();
         }
     }, ms);
@@ -177,7 +178,7 @@ var clearSimulationChart = () => {
     replayChart.data.datasets[0].data = [];
     replayChart.update();
     if (dataForRabbit.length > 0) {
-        sendforRabbit();
+        stopExecution();
     }
 }
 
