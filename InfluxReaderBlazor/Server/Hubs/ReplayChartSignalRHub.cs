@@ -19,6 +19,7 @@ namespace InfluxReaderBlazor.Server.Hubs
         private List<string> entities { get; set; }
         private int Counter { get; set; }
         private DateTime SimulationDate { get; set; }
+        public string SimulationId { get; set; }
 
         public ReplayChartSignalRHub(IRabbitSender rabbitSender)
         {
@@ -36,6 +37,7 @@ namespace InfluxReaderBlazor.Server.Hubs
             ValueModelArray = List;
             entities = List.Select(x => x.EntityName).ToList();
             SimulationDate = DateTime.Now;
+            SimulationId = Guid.NewGuid().ToString();
             _timer.Start();
         }
 
@@ -46,7 +48,8 @@ namespace InfluxReaderBlazor.Server.Hubs
             {
                 TimeStamp = DateTime.Now.Ticks,
                 Entities = entities,
-                Dateref = SimulationDate.Ticks
+                Dateref = SimulationDate.Ticks,
+                SimId = SimulationId
             })}");
             Counter++;
             if (Counter == List[0].Values.Count)
@@ -55,7 +58,8 @@ namespace InfluxReaderBlazor.Server.Hubs
                 {
                     TimeStamp = DateTime.Now.Ticks,
                     Entities = entities,
-                    Dateref = SimulationDate.Ticks
+                    Dateref = SimulationDate.Ticks,
+                    SimId = SimulationId
                 })}");
                 _timer.Stop();
             }
