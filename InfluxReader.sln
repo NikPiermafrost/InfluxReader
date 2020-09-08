@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\DataAccess.csproj", "{A44B82D5-D7B3-4807-828B-8D6E6359810B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "influx-fe", "influx-fe\influx-fe.csproj", "{5AF648BC-D9FB-4DA2-9387-AF8187FBF26F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfluxReaderBlazor.Server", "InfluxReaderBlazor\Server\InfluxReaderBlazor.Server.csproj", "{624662E3-B39B-4183-B1AC-41D51FE6BC79}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfluxReaderBlazor.Client", "InfluxReaderBlazor\Client\InfluxReaderBlazor.Client.csproj", "{E1FA0E1D-0A02-43DE-96CF-0B1401F84F80}"
@@ -23,10 +21,6 @@ Global
 		{A44B82D5-D7B3-4807-828B-8D6E6359810B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A44B82D5-D7B3-4807-828B-8D6E6359810B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A44B82D5-D7B3-4807-828B-8D6E6359810B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5AF648BC-D9FB-4DA2-9387-AF8187FBF26F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AF648BC-D9FB-4DA2-9387-AF8187FBF26F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5AF648BC-D9FB-4DA2-9387-AF8187FBF26F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5AF648BC-D9FB-4DA2-9387-AF8187FBF26F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{624662E3-B39B-4183-B1AC-41D51FE6BC79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{624662E3-B39B-4183-B1AC-41D51FE6BC79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{624662E3-B39B-4183-B1AC-41D51FE6BC79}.Release|Any CPU.ActiveCfg = Release|Any CPU

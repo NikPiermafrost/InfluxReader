@@ -18,7 +18,7 @@ else
     private List<ValueModel> List = new List<ValueModel>();
     private bool valuesLoaded = false;
     private SimulationValues SimulationValues = new SimulationValues();
-    private string baseUrl => "https://localhost:44387/api/Data";
+    private string baseUrl => "/api/Data";
     private IEnumerable<string> dataConfig;
 
     protected override async Task OnInitializedAsync()
