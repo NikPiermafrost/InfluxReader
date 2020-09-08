@@ -1,0 +1,8 @@
+{
+  "dataTables": [
+    "bool",
+    "int",
+    "float",
+    "string"
+  ]
+}

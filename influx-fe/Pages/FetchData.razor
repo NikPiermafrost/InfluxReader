@@ -10,7 +10,7 @@
 else
 {
     <div class="container-fluid">
-        <ChartComponent List="@List" CallNewData="@UpdateGraphData"></ChartComponent>
+        <ChartComponent List="@List" CallNewData="@UpdateGraphData" DropDownValues="@dataConfig"></ChartComponent>
     </div>
 }
 
@@ -19,9 +19,12 @@ else
     private bool valuesLoaded = false;
     private SimulationValues SimulationValues = new SimulationValues();
     private string baseUrl => "https://localhost:44387/api/Data";
+    private IEnumerable<string> dataConfig;
 
     protected override async Task OnInitializedAsync()
     {
+        var getConfig = await Http.GetFromJsonAsync<ConfigModel>("/configurationData.json");
+        dataConfig = getConfig.DataTables;
         var InitialParams = new RequestParams()
         {
             StartDate = DateTime.Today.Ticks,

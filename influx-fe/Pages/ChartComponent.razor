@@ -45,17 +45,20 @@
     private int SliderValue = 0;
     private DateTime StartDate = DateTime.Today;
     private DateTime EndDate = DateTime.Now;
-    private IEnumerable<string> DropDownValues = new string[] { "string", "int", "bool", "float" };
-    private IEnumerable<string> Selected = new string[] { "string", "int", "bool", "float" };
+    private IEnumerable<string> Selected = new string[] { };
 
     [Parameter]
     public List<ValueModel> List { get; set; }
+
+    [Parameter]
+    public IEnumerable<string> DropDownValues { get; set; }
 
     [Parameter]
     public EventCallback<RequestParams> CallNewData { get; set; }
 
     protected override void OnInitialized()
     {
+        Selected = DropDownValues;
         SliderValue = List.First().Values.Count - 1;
     }
 
