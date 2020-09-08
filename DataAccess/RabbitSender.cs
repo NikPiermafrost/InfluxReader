@@ -32,7 +32,6 @@ namespace DataAccess
                 var body = Encoding.UTF8.GetBytes(Data);
 
                 _channel.BasicPublish(exchange: _conf.Exchange, routingKey: _conf.RoutingKey, basicProperties: null, body: body);
-                Console.WriteLine($"Sent: {Data}");
             }
             catch (Exception ex)
             {
