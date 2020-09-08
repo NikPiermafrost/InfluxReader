@@ -46,6 +46,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/replayhub"))
         .Build();
@@ -60,7 +61,6 @@
 
     void BackToData()
     {
-
         NavigationManager.NavigateTo("/fetchdata");
     }
 
@@ -92,11 +92,15 @@
 
     private async Task StopSimulation()
     {
-        //await JSRuntime.InvokeVoidAsync("stopExecution");
+        await hubConnection.StopAsync();
     }
 
     private async Task ResetSimulation()
     {
+        if (hubConnection.State == HubConnectionState.Disconnected)
+        {
+            await hubConnection.StartAsync();
+        }
         await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
     }
 

@@ -8,7 +8,6 @@ namespace InfluxReaderBlazor.Shared
     {
         public long Dateref { get; set; }
         public long TimeStamp { get; set; }
-        public int Status { get; set; }
         public List<string> Entities { get; set; }
     }
 }
