@@ -33,8 +33,15 @@ var genChart = (values) => {
 //create new dataset for graph
 var newDataset = (newArray) => {
     arr = JSON.parse(newArray);
-    chart.data.labels = arr.map(x => new Date(x.Time).toLocaleString());
-    chart.data.datasets[0].data = arr.map(x => x.Value);
+    chart.data.labels = arr[0].Values.map(x => new Date(x.Time).toLocaleString());
+    chart.data.datasets = arr.map((dataSet) => {
+        return {
+            label: dataSet.EntityName,
+            fill: false,
+            borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+            data: dataSet.Values.map(x => x.Value)
+        };
+    });
     chart.update();
 }
 
@@ -61,14 +68,16 @@ var replayCtx;
 //replay chart object
 var replayChart;
 //replay chart array
-var replayChartarray;
+var replayChartarray = [];
 
 var dataForRabbit = [];
 
 //furst initialization of the replay chart
 var initReplayChart = () => {
     replayCtx = document.getElementById('replay-chart').getContext('2d');
-    replayChartarray = arr.slice(initialArrayPosition, finalArrayPosition + 1);
+    arr.forEach((dataSet) => {
+        replayChartarray.push({ EntityName: dataSet.EntityName, Values: dataSet.Values.slice(initialArrayPosition, finalArrayPosition + 1) });
+    });
     genReplayChart(replayChartarray);
 }
 
@@ -80,18 +89,19 @@ var sendforRabbit = () => {
 //initialization of the chart object
 var genReplayChart = (values) => {
     replayChart = new Chart(replayCtx, {
-        // The type of chart we want to create
         type: 'line',
-        // The data for our dataset
         data: {
-            labels: values.map(x => new Date(x.Time).toLocaleString()),
-            datasets: [{
-                label: 'Dataset',
-                fill: false,
-                borderColor: '#F24B4B',
-                data: values.map(x => x.Value)
-            }]
+            labels: values[0].Values.map(x => new Date(x.Time).toLocaleString()),
+            datasets: values.map((item) => {
+                return {
+                    label: item.EntityName,
+                    fill: false,
+                    borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                    data: item.Values.map(x => x.Value)
+                };
+            })
         },
+
         // Configuration options go here
         options: {
             responsive: true,
@@ -119,7 +129,7 @@ var initializeSimulation = (ms, zoom) => {
         }
         replayChart.update()
         counter++;
-        if (counter === replayChartarray.length) {
+        if (counter === replayChartarray[0].Values.length) {
             clearInterval(executionHandler);
             resetAfterSimulation();
         }
@@ -139,7 +149,7 @@ var loopSimulation = (ms, zoom) => {
         }
         replayChart.update()
         counter++;
-        if (counter === replayChartarray.length) {
+        if (counter === replayChartarray[0].Values.length) {
             counter = 0;
             clearSimulationChart();
         }
@@ -148,37 +158,41 @@ var loopSimulation = (ms, zoom) => {
 
 var stopExecution = () => {
     clearInterval(executionHandler);
-    sendforRabbit();
+    //sendforRabbit();
 }
 
 //adds the next field for the simulation
 var addDataToSimulation = (arrPosition) => {
-    replayChart.data.labels.push(new Date(replayChartarray[arrPosition].Time).toLocaleString());
-    replayChart.data.datasets[0].data.push(replayChartarray[arrPosition].Value);
-    dataForRabbit.push({ time: replayChartarray[arrPosition].Time, value: replayChartarray[arrPosition].Value});
+    replayChart.data.labels.push(new Date(replayChartarray[0].Values[arrPosition].Time).toLocaleString());
+    replayChartarray.forEach((dataSet, index) => {
+        replayChart.data.datasets[index].data.push(dataSet.Values[arrPosition].Value);
+    });
+    //dataForRabbit.push({ time: replayChartarray[arrPosition].Time, value: replayChartarray[arrPosition].Value});
 }
 
 //removes the first field for the simulation
 var removeLastDataToSimulation = () => {
     replayChart.data.labels.shift();
-    replayChart.data.datasets[0].data.shift();
+    replayChart.data.datasets.forEach(x => x.data.shift());
 }
 
 //resets the graph after simulation is completed
 var resetAfterSimulation = () => {
-    replayChart.data.labels = replayChartarray.map(x => new Date(x.Time).toLocaleString());
-    replayChart.data.datasets[0].data = replayChartarray.map(x => x.Value);
     stopExecution();
+    replayChart.data.labels = replayChartarray[0].Values.map(x => new Date(x.Time).toLocaleString());
+    replayChartarray.forEach((dataSet, index) => {
+        replayChart.data.datasets[index].data = dataSet.Values.map(x => x.Value);
+    });
     replayChart.update();
-    if (dataForRabbit.length > 0) {
-        sendforRabbit();
-    }
+    //if (dataForRabbit.length > 0) {
+    //    sendforRabbit();
+    //}
 }
 
 //empties the chart for initialization
 var clearSimulationChart = () => {
     replayChart.data.labels = [];
-    replayChart.data.datasets[0].data = [];
+    replayChart.data.datasets.forEach((x) => { x.data = []});
     replayChart.update();
     if (dataForRabbit.length > 0) {
         stopExecution();

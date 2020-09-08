@@ -1,6 +1,7 @@
 ﻿@inject IJSRuntime JSRuntime
 @using influx_fe.Models
 @using Newtonsoft.Json
+@using Radzen.Blazor
 @inject NavigationManager NavigationManager
 
 <div class="card">
@@ -13,12 +14,11 @@
                 <input type="date" class="form-control form-control-sm mr-3" @bind="@EndDate" />
             </div>
             <div class="d-flex">
-                <select @bind="SelectedData" class="form-control form-control-sm mr-3">
-                    @foreach (var value in List)
-                    {
-                        <option value="@value.EntityName">@value.EntityName</option>
-                    }
-                </select>
+                <RadzenDropDown AllowClear="true"
+                                @bind-Value="Selected"
+                                Multiple="true"
+                                Data="DropDownValues"
+                                class="form-control form-control-sm mr-3"></RadzenDropDown>
                 <button type="button" class="btn btn-sm btn-primary mr-3" @onclick="@(() => UpdateDataTimeStamp())">Update</button>
                 <button type="button" class="btn btn-sm btn-primary" @onclick="@(() => NavigationManager.NavigateTo("/fetchdata/simulation"))">Start</button>
             </div>
@@ -45,13 +45,14 @@
     private int SliderValue = 0;
     private DateTime StartDate = DateTime.Today;
     private DateTime EndDate = DateTime.Now;
-    private int SelectedData = 0;
+    private IEnumerable<string> DropDownValues = new string[] { "string", "int", "bool", "float" };
+    private IEnumerable<string> Selected = new string[] { "string", "int", "bool", "float" };
 
     [Parameter]
     public List<ValueModel> List { get; set; }
 
     [Parameter]
-    public EventCallback<DataTimeStamps> CallNewData { get; set; }
+    public EventCallback<RequestParams> CallNewData { get; set; }
 
     protected override void OnInitialized()
     {
@@ -69,11 +70,11 @@
 
     private async Task UpdateDataTimeStamp()
     {
-        var toEmit = new DataTimeStamps()
+        var toEmit = new RequestParams()
         {
-            DateEnd = EndDate.Date == StartDate.Date ? DateTime.Now : EndDate,
-            DateStart = EndDate.Date == StartDate.Date ? DateTime.Today : StartDate,
-            DataRequested = SelectedData
+            EndDate = EndDate.Date == StartDate.Date ? DateTime.Now.Ticks : EndDate.Ticks,
+            StartDate = EndDate.Date == StartDate.Date ? DateTime.Today.Ticks : StartDate.Ticks,
+            Entities = Selected.ToList()
         };
         await CallNewData.InvokeAsync(toEmit);
     }

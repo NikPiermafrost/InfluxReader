@@ -36,37 +36,16 @@ else
         }
     }
 
-    public async Task UpdateGraphData(DataTimeStamps dataTimeStamps)
+    public async Task UpdateGraphData(RequestParams requestParams)
     {
-        //var res = await Http.GetAsync(QueryParser(dataTimeStamps.DateStart, dataTimeStamps.DateEnd, "RandomInt"));
-        //if (res.IsSuccessStatusCode)
-        //{
-        //    IntList = await res.Content.ReadFromJsonAsync<List<IntModel>>();
-        //}
-        //var floatRes = await Http.GetAsync(QueryParser(dataTimeStamps.DateStart, dataTimeStamps.DateEnd, "RandomFloat"));
-        //if (floatRes.IsSuccessStatusCode)
-        //{
-        //    FloatList = await floatRes.Content.ReadFromJsonAsync<List<FloatModel>>();
-        //}
-        //await UpdateGraph(dataTimeStamps.DataRequested);
-    }
-
-    public async Task UpdateGraph(int dataToLoad)
-    {
-        //switch (dataToLoad)
-        //{
-        //    case 0:
-        //        await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(IntList));
-        //        await JSRuntime.InvokeVoidAsync("updateSliderValue", IntList.Count - 1);
-        //        break;
-        //    case 1:
-        //        await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(FloatList));
-        //        await JSRuntime.InvokeVoidAsync("updateSliderValue", FloatList.Count - 1);
-        //        break;
-        //    default:
-        //        await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(IntList));
-        //        await JSRuntime.InvokeVoidAsync("updateSliderValue", IntList.Count - 1);
-        //        break;
-        //}
+        var newList = requestParams.Entities.Where(x => !string.IsNullOrEmpty(x)).ToList();
+        requestParams.Entities = newList;
+        var res = await Http.PostAsJsonAsync(baseUrl, requestParams);
+        if (res.IsSuccessStatusCode)
+        {
+            List = await res.Content.ReadFromJsonAsync<List<ValueModel>>();
+            await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(List));
+            await JSRuntime.InvokeVoidAsync("updateSliderValue", List.First().Values.Count - 1);
+        }
     }
 }
