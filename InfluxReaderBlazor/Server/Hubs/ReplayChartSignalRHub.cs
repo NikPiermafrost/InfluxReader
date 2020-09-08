@@ -43,7 +43,6 @@ namespace InfluxReaderBlazor.Server.Hubs
 
         private async Task RabbitHandler(List<ValueModel> List)
         {
-            await _clients.Caller.SendAsync("CounterForjs", Counter);
             _rabbitSender.SendReplayDataToRabbit(@$"{JsonConvert.SerializeObject(new SimulationtoRabbitValues
             {
                 TimeStamp = DateTime.Now.Ticks,
@@ -51,16 +50,10 @@ namespace InfluxReaderBlazor.Server.Hubs
                 Dateref = SimulationDate.Ticks,
                 SimId = SimulationId
             })}");
+            await _clients.Caller.SendAsync("CounterForjs", Counter);
             Counter++;
             if (Counter == List[0].Values.Count)
             {
-                _rabbitSender.SendReplayDataToRabbit(@$"{JsonConvert.SerializeObject(new SimulationtoRabbitValues
-                {
-                    TimeStamp = DateTime.Now.Ticks,
-                    Entities = entities,
-                    Dateref = SimulationDate.Ticks,
-                    SimId = SimulationId
-                })}");
                 _timer.Stop();
             }
         }
