@@ -2,6 +2,9 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
+@using InfluxReaderBlazor.Shared
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IDisposable
 
 <div class="container-fluid">
     <div class="card">
@@ -11,9 +14,9 @@
                     <label class="mr-3" for="looptime">Frequency(ms):</label>
                     <input id="looptime" type="number" class="form-control form-control-sm mr-3" @bind="LoopTime" />
                     <label for="zoom" class="mr-3">Zoom: </label>
-                    <input id="zoom" type="number" class="form-control form-control-sm" @bind="Zoomlevel" />
+                    <input id="zoom" min="5" value="5" type="number" class="form-control form-control-sm" @onchange="@(e => ChangeZoomlevel(e))" />
                 </div>
-                <button class="btn btn-primary btn-sm" @onclick="@(() => NavigationManager.NavigateTo("/fetchdata"))">Back to data</button>
+                <button class="btn btn-primary btn-sm" @onclick="@BackToData">Back to data</button>
             </div>
         </div>
         <div class="card-body" style="min-height: 600px;">
@@ -23,7 +26,7 @@
             <div class="d-flex justify-content-between">
                 <button type="button" class="btn btn-warning" @onclick="@ResetSimulation">Reset Simulation</button>
                 <div>
-                    <button type="button" class="btn btn-success mr-3" @onclick="@RunSimulation">Start simulation</button>
+                    <button type="button" disabled="@(!IsConnected)" class="btn btn-success mr-3" @onclick="@RunSimulation">Start simulation</button>
                     <button type="button" class="btn btn-primary mr-3" @onclick="@LoopSimulation">loop simulation</button>
                     <button type="button" class="btn btn-danger mr-3" @onclick="@StopSimulation">Stop simulation</button>
                 </div>
@@ -33,55 +36,75 @@
 </div>
 
 @code {
+    private HubConnection hubConnection;
+
     private string baseUrl => "https://localhost:44387/api/RabbitSender";
 
     private int LoopTime = 500;
 
-    private int Zoomlevel = 5;
+    private List<ValueModel> ReplayChartArray = new List<ValueModel>();
 
-    private static Action<string> dataReceiver;
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        dataReceiver = SendToRabbit;
+        hubConnection = new HubConnectionBuilder()
+        .WithUrl(NavigationManager.ToAbsoluteUri("/replayhub"))
+        .Build();
+
+        hubConnection.On<int>("CounterForjs", async (counter) =>
+        {
+            await JSRuntime.InvokeVoidAsync("addDataToSimulation", counter);
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    void BackToData()
+    {
+
+        NavigationManager.NavigateTo("/fetchdata");
+    }
+
+    async Task ChangeZoomlevel(ChangeEventArgs e)
+    {
+        await JSRuntime.InvokeVoidAsync("setZoomLevel", Convert.ToInt32(e.Value));
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("initReplayChart");
+            ReplayChartArray = await JSRuntime.InvokeAsync<List<ValueModel>>("initReplayChart");
         }
-    }
-
-    private void SendToRabbit(string Data)
-    {
-        HttpClient.PostAsJsonAsync(baseUrl, Data);
     }
 
     private async Task RunSimulation()
     {
-        await JSRuntime.InvokeVoidAsync("initializeSimulation", LoopTime, Zoomlevel);
+        if (await JSRuntime.InvokeAsync<bool>("clearSimulationChart"))
+        {
+            await hubConnection.SendAsync("InitializeSimulation", ReplayChartArray, LoopTime);
+        }
     }
 
     private async Task LoopSimulation()
     {
-        await JSRuntime.InvokeVoidAsync("loopSimulation", LoopTime, Zoomlevel);
+        //await JSRuntime.InvokeVoidAsync("loopSimulation", LoopTime, Zoomlevel);
     }
 
     private async Task StopSimulation()
     {
-        await JSRuntime.InvokeVoidAsync("stopExecution");
+        //await JSRuntime.InvokeVoidAsync("stopExecution");
     }
 
     private async Task ResetSimulation()
     {
-        await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
+        //await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
     }
 
-    [JSInvokable]
-    public static void receiveRabbitDataFromJs(string Data)
+    public bool IsConnected =>
+        hubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
     {
-        dataReceiver.Invoke(Data);
+        _ = hubConnection.DisposeAsync();
     }
 }

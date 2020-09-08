@@ -75,15 +75,12 @@ var dataForRabbit = [];
 //furst initialization of the replay chart
 var initReplayChart = () => {
     replayCtx = document.getElementById('replay-chart').getContext('2d');
+    replayChartarray = [];
     arr.forEach((dataSet) => {
         replayChartarray.push({ EntityName: dataSet.EntityName, Values: dataSet.Values.slice(initialArrayPosition, finalArrayPosition + 1) });
     });
     genReplayChart(replayChartarray);
-}
-
-var sendforRabbit = () => {
-    DotNet.invokeMethodAsync('influx-fe', 'receiveRabbitDataFromJs', JSON.stringify(dataForRabbit));
-    dataForRabbit = [];
+    return replayChartarray;
 }
 
 //initialization of the chart object
@@ -114,27 +111,7 @@ var genReplayChart = (values) => {
 
 var counter;
 var executionHandler;
-
-//sets the interval for data reproduction
-var initializeSimulation = (ms, zoom) => {
-    counter = 0;
-    if (executionHandler) {
-        stopExecution();
-    }
-    clearSimulationChart();
-    executionHandler = setInterval(() => {
-        addDataToSimulation(counter);
-        if (zoom < counter && zoom >= 3) {
-            removeLastDataToSimulation();
-        }
-        replayChart.update()
-        counter++;
-        if (counter === replayChartarray[0].Values.length) {
-            clearInterval(executionHandler);
-            resetAfterSimulation();
-        }
-    }, ms);
-}
+var zoomLevel = 5;
 
 var loopSimulation = (ms, zoom) => {
     counter = 0;
@@ -156,9 +133,9 @@ var loopSimulation = (ms, zoom) => {
     }, ms);
 }
 
-var stopExecution = () => {
-    clearInterval(executionHandler);
-    //sendforRabbit();
+var setZoomLevel = (zoom) => {
+    zoomLevel = zoom;
+    console.log(zoom);
 }
 
 //adds the next field for the simulation
@@ -167,7 +144,10 @@ var addDataToSimulation = (arrPosition) => {
     replayChartarray.forEach((dataSet, index) => {
         replayChart.data.datasets[index].data.push(dataSet.Values[arrPosition].Value);
     });
-    //dataForRabbit.push({ time: replayChartarray[arrPosition].Time, value: replayChartarray[arrPosition].Value});
+    if (arrPosition >= zoomLevel) {
+        removeLastDataToSimulation();
+    }
+    replayChart.update();
 }
 
 //removes the first field for the simulation
@@ -178,25 +158,19 @@ var removeLastDataToSimulation = () => {
 
 //resets the graph after simulation is completed
 var resetAfterSimulation = () => {
-    stopExecution();
     replayChart.data.labels = replayChartarray[0].Values.map(x => new Date(x.Time).toLocaleString());
     replayChartarray.forEach((dataSet, index) => {
         replayChart.data.datasets[index].data = dataSet.Values.map(x => x.Value);
     });
     replayChart.update();
-    //if (dataForRabbit.length > 0) {
-    //    sendforRabbit();
-    //}
 }
 
 //empties the chart for initialization
 var clearSimulationChart = () => {
     replayChart.data.labels = [];
-    replayChart.data.datasets.forEach((x) => { x.data = []});
+    replayChart.data.datasets.forEach(x => x.data = []);
     replayChart.update();
-    if (dataForRabbit.length > 0) {
-        stopExecution();
-    }
+    return true;
 }
 
 //double slider obj
