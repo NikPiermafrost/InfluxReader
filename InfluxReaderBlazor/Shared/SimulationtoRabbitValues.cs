@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace InfluxReaderBlazor.Shared
+{
+    public class SimulationtoRabbitValues
+    {
+        public long TimeStamp { get; set; }
+        public int Status { get; set; }
+        public List<string> Entities { get; set; }
+    }
+}
