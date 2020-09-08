@@ -3,13 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace DataAccess.Models
+namespace InfluxReaderBlazor.Shared
 {
-    public class BoolModel
+    public class IntModel
     {
         [InfluxDBTime]
         public DateTime Time { get; set; }
         [InfluxDBField(nameof(Value))]
-        public bool Value { get; set; }
+        public int Value { get; set; }
     }
 }

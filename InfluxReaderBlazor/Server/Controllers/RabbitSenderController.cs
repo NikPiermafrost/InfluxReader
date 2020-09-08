@@ -6,7 +6,7 @@ using DataAccess;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InfluxReader.Controllers
+namespace InfluxReaderBlazor.Server
 {
     [Route("api/[controller]")]
     [ApiController]

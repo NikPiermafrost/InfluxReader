@@ -1,4 +1,4 @@
-﻿using DataAccess.Models;
+﻿using InfluxReaderBlazor.Shared;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

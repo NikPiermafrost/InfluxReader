@@ -1,4 +1,4 @@
-﻿using DataAccess.Models;
+﻿using InfluxReaderBlazor.Shared;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;

@@ -4,11 +4,11 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using DataAccess;
-using DataAccess.Models;
+using InfluxReaderBlazor.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace InfluxReader.Controllers
+namespace InfluxReaderBlazor.Server
 {
     [Route("api/[controller]")]
     [ApiController]
