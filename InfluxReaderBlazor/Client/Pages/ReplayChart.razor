@@ -47,28 +47,33 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //connects to the signalr hub
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/replayhub"))
         .Build();
 
         hubConnection.On<int>("CounterForjs", async (counter) =>
         {
+            //checks if the counter resets to 0. if so, it clears the chart
             if (counter < bufferCounter)
             {
                 await JSRuntime.InvokeAsync<bool>("clearSimulationChart");
             }
             bufferCounter = counter;
+            //calls the js functions to handle the chart
             await JSRuntime.InvokeVoidAsync("addDataToSimulation", counter);
         });
 
         await hubConnection.StartAsync();
     }
 
+    //simple method to go back to the fetch data page
     void BackToData()
     {
         NavigationManager.NavigateTo("/fetchdata");
     }
 
+    //changes the number of data displayed on the chart during reproduction
     async Task ChangeZoomlevel(ChangeEventArgs e)
     {
         await JSRuntime.InvokeVoidAsync("setZoomLevel", Convert.ToInt32(e.Value));
@@ -78,6 +83,7 @@
     {
         if (firstRender)
         {
+            //fetched the array of data for the simulation, stored in the js interop file
             ReplayChartArray = await JSRuntime.InvokeAsync<List<ValueModel>>("initReplayChart");
             CheckValidData(ReplayChartArray);
         }
@@ -85,6 +91,7 @@
 
     private async Task RunSimulation()
     {
+        //startes the simulation after the chart is cleared successfully
         if (await JSRuntime.InvokeAsync<bool>("clearSimulationChart"))
         {
             await hubConnection.SendAsync("InitializeSimulation", ReplayChartArray, LoopTime, false);
@@ -93,6 +100,7 @@
 
     private async Task LoopSimulation()
     {
+        //same thing as above
         if (await JSRuntime.InvokeAsync<bool>("clearSimulationChart"))
         {
             await hubConnection.SendAsync("InitializeSimulation", ReplayChartArray, LoopTime, true);
@@ -101,18 +109,22 @@
 
     private async Task StopSimulation()
     {
+        //simply stops the connection to stop the data for being sent
         await hubConnection.StopAsync();
     }
 
     private async Task ResetSimulation()
     {
+        //stops the data stream, then reinitializes the connection
         await hubConnection.StopAsync().ContinueWith(x => hubConnection.StartAsync());
         await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
     }
 
+    //checks the state of the connection
     public bool IsConnected =>
         hubConnection.State == HubConnectionState.Connected;
 
+    //if there is not any form of data in the array from JS, goes back (for example, happens in case of refresh)
     public void CheckValidData(List<ValueModel> valueModels)
     {
         if (valueModels.Count == 0)

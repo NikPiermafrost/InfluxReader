@@ -66,6 +66,7 @@
     {
         if (firstRender)
         {
+            //calls the javascript interop file to handle chartjs and ionslider
             await JSRuntime.InvokeVoidAsync("chartInitializer", JsonConvert.SerializeObject(List));
             await JSRuntime.InvokeVoidAsync("initSlider", List.First().Values.Count - 1);
         }
@@ -73,6 +74,7 @@
 
     private async Task UpdateDataTimeStamp()
     {
+        //updates the values requested
         var toEmit = new RequestParams()
         {
             EndDate = EndDate.Date == StartDate.Date ? DateTime.Now.Ticks : EndDate.Ticks,

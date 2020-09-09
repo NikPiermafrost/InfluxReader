@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -33,7 +34,7 @@ namespace InfluxReaderBlazor.Server.Hubs
 
         public async Task InitializeSimulation(List<ValueModel> List, int Frequency, bool isReplay)
         {
-            Counter = 0;
+            //in order to apply some data on the timer handler, i have to initialize some data on the constructor
             _clients = Clients;
             _timer.Interval = Frequency;
             ValueModelArray = List;
@@ -46,6 +47,7 @@ namespace InfluxReaderBlazor.Server.Hubs
 
         private async Task RabbitHandler(List<ValueModel> List)
         {
+            //sends the displayed data on the rabbitmq service
             _rabbitSender.SendReplayDataToRabbit(@$"{JsonConvert.SerializeObject(new SimulationtoRabbitValues
             {
                 TimeStamp = DateTime.Now.Ticks,
@@ -53,8 +55,10 @@ namespace InfluxReaderBlazor.Server.Hubs
                 Dateref = SimulationDate.Ticks,
                 SimId = SimulationId
             })}");
+            //sends back to the frontend the counter of the displayed data for the data flow shifting
             await _clients.Caller.SendAsync("CounterForjs", Counter);
             Counter++;
+            //resets the counter to 0 if it's a loop when it has reached the end of the array
             if (Counter == List[0].Values.Count)
             {
                 if (IsReplay)

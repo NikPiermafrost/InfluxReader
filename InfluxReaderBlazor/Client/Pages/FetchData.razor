@@ -23,8 +23,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        //gets the configuration for the app (example: database tables)
         var getConfig = await Http.GetFromJsonAsync<ConfigModel>("/configurationData.json");
         dataConfig = getConfig.DataTables;
+        //set the first http request to fetch the data
         var InitialParams = new RequestParams()
         {
             StartDate = DateTime.Today.Ticks,
@@ -34,6 +36,7 @@ else
         var request = await Http.PostAsJsonAsync(baseUrl, InitialParams);
         if (request.IsSuccessStatusCode)
         {
+            //the if else triggers the lifecycle of the Chart component
             List = await request.Content.ReadFromJsonAsync<List<ValueModel>>();
             valuesLoaded = true;
         }
@@ -41,6 +44,7 @@ else
 
     public async Task UpdateGraphData(RequestParams requestParams)
     {
+        //method who handles the reset of the graph if a new request is asked
         var newList = requestParams.Entities.Where(x => !string.IsNullOrEmpty(x)).ToList();
         requestParams.Entities = newList;
         var res = await Http.PostAsJsonAsync(baseUrl, requestParams);
