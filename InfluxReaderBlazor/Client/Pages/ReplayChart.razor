@@ -27,7 +27,7 @@
                 <button type="button" class="btn btn-warning" @onclick="@ResetSimulation">Reset Simulation</button>
                 <div>
                     <button type="button" disabled="@(!IsConnected)" class="btn btn-success mr-3" @onclick="@RunSimulation">Start simulation</button>
-                    <button type="button" class="btn btn-primary mr-3" @onclick="@LoopSimulation">loop simulation</button>
+                    <button type="button" disabled="@(!IsConnected)" class="btn btn-primary mr-3" @onclick="@LoopSimulation">loop simulation</button>
                     <button type="button" class="btn btn-danger mr-3" @onclick="@StopSimulation">Stop simulation</button>
                 </div>
             </div>
@@ -43,16 +43,21 @@
     private int LoopTime = 500;
 
     private List<ValueModel> ReplayChartArray = new List<ValueModel>();
+    public int bufferCounter = 0;
 
     protected override async Task OnInitializedAsync()
     {
-
         hubConnection = new HubConnectionBuilder()
         .WithUrl(NavigationManager.ToAbsoluteUri("/replayhub"))
         .Build();
 
         hubConnection.On<int>("CounterForjs", async (counter) =>
         {
+            if (counter < bufferCounter)
+            {
+                await JSRuntime.InvokeAsync<bool>("clearSimulationChart");
+            }
+            bufferCounter = counter;
             await JSRuntime.InvokeVoidAsync("addDataToSimulation", counter);
         });
 
@@ -74,6 +79,7 @@
         if (firstRender)
         {
             ReplayChartArray = await JSRuntime.InvokeAsync<List<ValueModel>>("initReplayChart");
+            CheckValidData(ReplayChartArray);
         }
     }
 
@@ -81,13 +87,16 @@
     {
         if (await JSRuntime.InvokeAsync<bool>("clearSimulationChart"))
         {
-            await hubConnection.SendAsync("InitializeSimulation", ReplayChartArray, LoopTime);
+            await hubConnection.SendAsync("InitializeSimulation", ReplayChartArray, LoopTime, false);
         }
     }
 
     private async Task LoopSimulation()
     {
-        //await JSRuntime.InvokeVoidAsync("loopSimulation", LoopTime, Zoomlevel);
+        if (await JSRuntime.InvokeAsync<bool>("clearSimulationChart"))
+        {
+            await hubConnection.SendAsync("InitializeSimulation", ReplayChartArray, LoopTime, true);
+        }
     }
 
     private async Task StopSimulation()
@@ -97,15 +106,20 @@
 
     private async Task ResetSimulation()
     {
-        if (hubConnection.State == HubConnectionState.Disconnected)
-        {
-            await hubConnection.StartAsync();
-        }
+        await hubConnection.StopAsync().ContinueWith(x => hubConnection.StartAsync());
         await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
     }
 
     public bool IsConnected =>
         hubConnection.State == HubConnectionState.Connected;
+
+    public void CheckValidData(List<ValueModel> valueModels)
+    {
+        if (valueModels.Count == 0)
+        {
+            NavigationManager.NavigateTo("/fetchdata");
+        }
+    }
 
     public void Dispose()
     {

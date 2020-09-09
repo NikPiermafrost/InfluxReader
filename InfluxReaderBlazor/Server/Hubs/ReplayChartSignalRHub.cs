@@ -1,6 +1,7 @@
 ﻿using DataAccess;
 using InfluxReaderBlazor.Shared;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.JSInterop;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace InfluxReaderBlazor.Server.Hubs
         private int Counter { get; set; }
         private DateTime SimulationDate { get; set; }
         public string SimulationId { get; set; }
+        public bool IsReplay { get; set; }
 
         public ReplayChartSignalRHub(IRabbitSender rabbitSender)
         {
@@ -29,7 +31,7 @@ namespace InfluxReaderBlazor.Server.Hubs
             _timer.Elapsed += async (sender, e) => await RabbitHandler(ValueModelArray);
         }
 
-        public async Task InitializeSimulation(List<ValueModel> List, int Frequency)
+        public async Task InitializeSimulation(List<ValueModel> List, int Frequency, bool isReplay)
         {
             Counter = 0;
             _clients = Clients;
@@ -38,6 +40,7 @@ namespace InfluxReaderBlazor.Server.Hubs
             entities = List.Select(x => x.EntityName).ToList();
             SimulationDate = DateTime.Now;
             SimulationId = Guid.NewGuid().ToString();
+            IsReplay = isReplay;
             _timer.Start();
         }
 
@@ -54,7 +57,14 @@ namespace InfluxReaderBlazor.Server.Hubs
             Counter++;
             if (Counter == List[0].Values.Count)
             {
-                _timer.Stop();
+                if (IsReplay)
+                {
+                    Counter = 0;
+                }
+                else
+                {
+                    _timer.Stop();
+                }
             }
         }
     }

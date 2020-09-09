@@ -79,59 +79,44 @@ var initReplayChart = () => {
     arr.forEach((dataSet) => {
         replayChartarray.push({ EntityName: dataSet.EntityName, Values: dataSet.Values.slice(initialArrayPosition, finalArrayPosition + 1) });
     });
-    genReplayChart(replayChartarray);
-    return replayChartarray;
+    var genGraph = genReplayChart(replayChartarray);
+    return genGraph ? replayChartarray : [];
 }
 
 //initialization of the chart object
 var genReplayChart = (values) => {
-    replayChart = new Chart(replayCtx, {
-        type: 'line',
-        data: {
-            labels: values[0].Values.map(x => new Date(x.Time).toLocaleString()),
-            datasets: values.map((item) => {
-                return {
-                    label: item.EntityName,
-                    fill: false,
-                    borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
-                    data: item.Values.map(x => x.Value)
-                };
-            })
-        },
+    try {
+        replayChart = new Chart(replayCtx, {
+            type: 'line',
+            data: {
+                labels: values[0].Values.map(x => new Date(x.Time).toLocaleString()),
+                datasets: values.map((item) => {
+                    return {
+                        label: item.EntityName,
+                        fill: false,
+                        borderColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+                        data: item.Values.map(x => x.Value)
+                    };
+                })
+            },
 
-        // Configuration options go here
-        options: {
-            responsive: true,
-            animation: {
-                duration: 0,
+            // Configuration options go here
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 0,
+                }
             }
-        }
-    });
+        });
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 var counter;
 var executionHandler;
 var zoomLevel = 5;
-
-var loopSimulation = (ms, zoom) => {
-    counter = 0;
-    if (executionHandler) {
-        stopExecution();
-    }
-    clearSimulationChart();
-    executionHandler = setInterval(() => {
-        addDataToSimulation(counter);
-        if (zoom < counter && zoom >= 3) {
-            removeLastDataToSimulation();
-        }
-        replayChart.update()
-        counter++;
-        if (counter === replayChartarray[0].Values.length) {
-            counter = 0;
-            clearSimulationChart();
-        }
-    }, ms);
-}
 
 var setZoomLevel = (zoom) => {
     zoomLevel = zoom;
