@@ -10,5 +10,6 @@ namespace InfluxReaderBlazor.Shared
         public long TimeStamp { get; set; }
         public List<string> Entities { get; set; }
         public string SimId { get; set; }
+        public bool IsLoop { get; set; }
     }
 }

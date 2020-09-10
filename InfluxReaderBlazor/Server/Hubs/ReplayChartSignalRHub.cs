@@ -24,6 +24,8 @@ namespace InfluxReaderBlazor.Server.Hubs
         private DateTime SimulationDate { get; set; }
         public string SimulationId { get; set; }
         public bool IsReplay { get; set; }
+        //handles the infinite data sento to the rabbit
+        public bool IsDisposed = false;
 
         public ReplayChartSignalRHub(IRabbitSender rabbitSender)
         {
@@ -43,19 +45,24 @@ namespace InfluxReaderBlazor.Server.Hubs
             SimulationDate = DateTime.Now;
             SimulationId = Guid.NewGuid().ToString();
             IsReplay = isReplay;
+            IsDisposed = false;
             _timer.Start();
         }
 
         private async Task RabbitHandler(List<ValueModel> List)
         {
             //sends the displayed data on the rabbitmq service
-            _rabbitSender.SendReplayDataToRabbit(@$"{JsonConvert.SerializeObject(new SimulationtoRabbitValues
+            if (!IsDisposed)
             {
-                TimeStamp = DateTime.Now.Ticks,
-                Entities = entities,
-                Dateref = SimulationDate.Ticks,
-                SimId = SimulationId
-            })}");
+                _rabbitSender.SendReplayDataToRabbit(@$"{JsonConvert.SerializeObject(new SimulationtoRabbitValues
+                {
+                    TimeStamp = DateTime.Now.Ticks,
+                    Entities = entities,
+                    Dateref = SimulationDate.Ticks,
+                    SimId = SimulationId,
+                    IsLoop = IsReplay
+                })}");
+            }
             //sends back to the frontend the counter of the displayed data for the data flow shifting
             await _clients.Caller.SendAsync("CounterForjs", Counter);
             Counter++;
@@ -65,6 +72,7 @@ namespace InfluxReaderBlazor.Server.Hubs
                 if (IsReplay)
                 {
                     Counter = 0;
+                    IsDisposed = true;
                 }
                 else
                 {

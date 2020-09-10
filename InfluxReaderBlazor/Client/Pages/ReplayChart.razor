@@ -116,7 +116,8 @@
     private async Task ResetSimulation()
     {
         //stops the data stream, then reinitializes the connection
-        await hubConnection.StopAsync().ContinueWith(x => hubConnection.StartAsync());
+        await hubConnection.StopAsync();
+        await hubConnection.StartAsync();
         await JSRuntime.InvokeVoidAsync("resetAfterSimulation");
     }
 
