@@ -42,6 +42,12 @@ namespace DataAccess
             }
         }
 
+        public async Task<List<string>> GetDatabaseTables()
+        {
+            var series = await _client.GetInfluxDBStructureAsync(_dbName);
+            return series.Measurements.Select(x => x.Name).ToList();
+        }
+
         private async Task<ValueModel> GetBoolEntries(DateTime DateStart, DateTime DateEnd)
         {
             var queryResult = await _client.QueryMultiSeriesAsync<BoolModel>(_dbName, $"SELECT * FROM IsLorem WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
