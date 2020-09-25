@@ -2,6 +2,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @using InfluxReaderBlazor.Shared
+@using Newtonsoft.Json
 
 @if (!valuesLoaded)
 {
@@ -10,7 +11,7 @@
 else
 {
     <div class="container-fluid">
-        <ChartComponent List="@List" CallNewData="@UpdateGraphData" DropDownValues="@dataConfig"></ChartComponent>
+        <ChartComponent List="@List" CallNewData="@UpdateGraphData" DropDownValues="@dataConfig" isSliderActivable="@isSliderActivable"></ChartComponent>
     </div>
 }
 
@@ -20,24 +21,26 @@ else
     private SimulationValues SimulationValues = new SimulationValues();
     private string baseUrl => "/api/Data";
     private IEnumerable<string> dataConfig;
+    private bool isSliderActivable = false;
 
     protected override async Task OnInitializedAsync()
     {
         //gets the configuration for the app (example: database tables)
-        var getConfig = await Http.GetFromJsonAsync<ConfigModel>("/configurationData.json");
-        dataConfig = getConfig.DataTables;
+        var getTables = await Http.GetFromJsonAsync<List<string>>(baseUrl);
+        dataConfig = getTables;
         //set the first http request to fetch the data
         var InitialParams = new RequestParams()
         {
             StartDate = DateTime.Today.Ticks,
             EndDate = DateTime.Now.Ticks,
-            Entities = new List<string>() { "string", "int", "bool", "float" }
+            Entities = dataConfig.Take(1).ToList()
         };
         var request = await Http.PostAsJsonAsync(baseUrl, InitialParams);
         if (request.IsSuccessStatusCode)
         {
             //the if else triggers the lifecycle of the Chart component
             List = await request.Content.ReadFromJsonAsync<List<ValueModel>>();
+            isSliderActivable = List.First().Values.Count > 1;
             valuesLoaded = true;
         }
     }
@@ -51,8 +54,18 @@ else
         if (res.IsSuccessStatusCode)
         {
             List = await res.Content.ReadFromJsonAsync<List<ValueModel>>();
-            await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(List));
-            await JSRuntime.InvokeVoidAsync("updateSliderValue", List.First().Values.Count - 1);
+            isSliderActivable = List.First().Values.Count > 1;
+            StateHasChanged();
+            if (requestParams.ActivateSlider)
+            {
+                await JSRuntime.InvokeVoidAsync("chartInitializer", JsonConvert.SerializeObject(List));
+                await JSRuntime.InvokeVoidAsync("initSlider", List.First().Values.Count - 1);
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("newDataset", Newtonsoft.Json.JsonConvert.SerializeObject(List));
+                await JSRuntime.InvokeVoidAsync("updateSliderValue", List.First().Values.Count - 1);
+            }
         }
     }
 }

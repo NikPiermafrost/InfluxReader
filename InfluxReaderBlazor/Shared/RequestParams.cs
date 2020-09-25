@@ -10,5 +10,6 @@ namespace InfluxReaderBlazor.Shared
         public long StartDate { get; set; }
         public long EndDate { get; set; }
         public List<string> Entities { get; set; }
+        public bool ActivateSlider { get; set; }
     }
 }

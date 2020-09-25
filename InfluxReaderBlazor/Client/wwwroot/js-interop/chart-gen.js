@@ -185,6 +185,9 @@ var initSlider = (maxArrCount) => {
 
 //updates the handle values
 var updateSliderValue = (newMaxValue) => {
+    if (!rangeSlider) {
+        initSlider(newMaxValue);
+    }
     rangeSlider.noUiSlider.updateOptions({
         range: {
             'min': 0,

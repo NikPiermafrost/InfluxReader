@@ -33,13 +33,24 @@ namespace DataAccess
 
         public async Task<ValueModel> GetEntries(DateTime DateStart, DateTime DateEnd, string EntityName)
         {
-            var queryResult = await _client.QueryMultiSeriesAsync<FloatModel>(_dbName, $"SELECT * FROM {EntityName} WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
-            var result = new ValueModel()
+            try
             {
-                EntityName = EntityName,
-                Values = queryResult.First().Entries.ToList()
-            };
-            return result;
+                var queryResult = await _client.QueryMultiSeriesAsync<FloatModel>(_dbName, $"SELECT * FROM {EntityName} WHERE time <= {GetEpoch(DateEnd)} AND time >= {GetEpoch(DateStart)}");
+                var result = new ValueModel()
+                {
+                    EntityName = EntityName,
+                    Values = queryResult.First().Entries.ToList()
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ValueModel()
+                {
+                    EntityName = EntityName,
+                    Values = new List<FloatModel>()
+                };
+            }
         }
 
         private long GetEpoch(DateTime Date)

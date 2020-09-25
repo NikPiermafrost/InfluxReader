@@ -33,7 +33,7 @@
         }
     </div>
     <div class="card-footer">
-        @if (List != null && List.Count > 1)
+        @if (List != null && isSliderActivable)
         {
             <div id="range-slider"></div>
         }
@@ -48,6 +48,9 @@
     private IEnumerable<string> Selected = new string[] { };
 
     [Parameter]
+    public bool isSliderActivable { get; set; }
+
+    [Parameter]
     public List<ValueModel> List { get; set; }
 
     [Parameter]
@@ -60,6 +63,7 @@
     {
         Selected = DropDownValues;
         SliderValue = List.First().Values.Count - 1;
+        isSliderActivable = SliderValue > 1;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -67,8 +71,11 @@
         if (firstRender)
         {
             //calls the javascript interop file to handle chartjs and ionslider
-            await JSRuntime.InvokeVoidAsync("chartInitializer", JsonConvert.SerializeObject(List));
-            await JSRuntime.InvokeVoidAsync("initSlider", List.First().Values.Count - 1);
+            if (isSliderActivable)
+            {
+                await JSRuntime.InvokeVoidAsync("chartInitializer", JsonConvert.SerializeObject(List));
+                await JSRuntime.InvokeVoidAsync("initSlider", List.First().Values.Count - 1);
+            }
         }
     }
 
@@ -79,7 +86,8 @@
         {
             EndDate = EndDate.Date == StartDate.Date ? DateTime.Now.Ticks : EndDate.Ticks,
             StartDate = EndDate.Date == StartDate.Date ? DateTime.Today.Ticks : StartDate.Ticks,
-            Entities = Selected.ToList()
+            Entities = Selected.ToList(),
+            ActivateSlider = !isSliderActivable
         };
         await CallNewData.InvokeAsync(toEmit);
     }
