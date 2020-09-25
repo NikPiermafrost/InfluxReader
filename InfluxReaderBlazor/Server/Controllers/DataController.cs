@@ -46,7 +46,7 @@ namespace InfluxReaderBlazor.Server
                 var result = new List<ValueModel>();
                 foreach (var entity in qrs.Entities)
                 {
-                    result.Add(await _srv.SelectDataReturn(entity, new DateTime(qrs.StartDate), new DateTime(qrs.EndDate)));
+                    result.Add(await _srv.GetEntries(new DateTime(qrs.StartDate), new DateTime(qrs.EndDate), entity));
                 }
                 var trimmed = _srv.TrimInconsistentData(result);
                 return Ok(trimmed);

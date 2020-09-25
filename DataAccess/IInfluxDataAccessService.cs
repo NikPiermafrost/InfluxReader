@@ -7,7 +7,7 @@ namespace DataAccess
 {
     public interface IInfluxDataAccessService
     {
-        Task<ValueModel> SelectDataReturn(string EntityType, DateTime DateStart, DateTime DateEnd);
+        Task<ValueModel> GetEntries(DateTime DateStart, DateTime DateEnd, string EntityName);
         Task<List<string>> GetDatabaseTables();
         List<ValueModel> TrimInconsistentData(List<ValueModel> toTrim);
     }

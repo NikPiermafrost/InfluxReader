@@ -25,69 +25,19 @@ namespace DataAccess
             _client = new InfluxDBClient(ipAddress, userName, password);
         }
 
-        public async Task<ValueModel> SelectDataReturn(string EntityType, DateTime DateStart, DateTime DateEnd)
-        {
-            switch (EntityType)
-            {
-                case "bool":
-                    return await GetBoolEntries(DateStart, DateEnd);
-                case "float":
-                    return await GetFloatEntries(DateStart, DateEnd);
-                case "int":
-                    return await GetIntEntries(DateStart, DateEnd);
-                case "string":
-                    return await GetStringEntries(DateStart, DateEnd);
-                default:
-                    throw new Exception($"Cannot find value type {EntityType}");
-            }
-        }
-
         public async Task<List<string>> GetDatabaseTables()
         {
             var series = await _client.GetInfluxDBStructureAsync(_dbName);
             return series.Measurements.Select(x => x.Name).ToList();
         }
 
-        private async Task<ValueModel> GetBoolEntries(DateTime DateStart, DateTime DateEnd)
+        public async Task<ValueModel> GetEntries(DateTime DateStart, DateTime DateEnd, string EntityName)
         {
-            var queryResult = await _client.QueryMultiSeriesAsync<BoolModel>(_dbName, $"SELECT * FROM IsLorem WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
+            var queryResult = await _client.QueryMultiSeriesAsync<FloatModel>(_dbName, $"SELECT * FROM {EntityName} WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
             var result = new ValueModel()
             {
-                EntityName = "bool",
-                Values = queryResult.First().Entries.Select(x => new FloatModel { Time = x.Time, Value = Convert.ToInt32(x.Value)}).ToList()
-            };
-            return result;
-        }
-
-        private async Task<ValueModel> GetFloatEntries(DateTime DateStart, DateTime DateEnd)
-        {
-            var queryResult = await _client.QueryMultiSeriesAsync<FloatModel>(_dbName, $"SELECT * FROM RandomInt WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
-            var result = new ValueModel()
-            {
-                EntityName = "float",
+                EntityName = EntityName,
                 Values = queryResult.First().Entries.ToList()
-            };
-            return result;
-        }
-
-        private async Task<ValueModel> GetIntEntries(DateTime DateStart, DateTime DateEnd)
-        {
-            var queryResult = await _client.QueryMultiSeriesAsync<IntModel>(_dbName, $"SELECT * FROM RandomFloat WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
-            var result = new ValueModel()
-            {
-                EntityName = "int",
-                Values = queryResult.First().Entries.Select(x => new FloatModel { Time = x.Time, Value = x.Value }).ToList()
-            };
-            return result;
-        }
-
-        private async Task<ValueModel> GetStringEntries(DateTime DateStart, DateTime DateEnd)
-        {
-            var queryResult = await _client.QueryMultiSeriesAsync<StringModel>(_dbName, $"SELECT * FROM LoremIpsum WHERE Time <= {GetEpoch(DateEnd)} AND Time >= {GetEpoch(DateStart)}");
-            var result = new ValueModel()
-            {
-                EntityName = "string",
-                Values = queryResult.First().Entries.Select(x => new FloatModel { Time = x.Time, Value = x.Value.Length }).ToList()
             };
             return result;
         }
